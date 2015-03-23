@@ -1,5 +1,6 @@
 package com.itshared.rseq;
 
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -7,16 +8,26 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 public class Match<E> {
 
-    private int index;
-    private Map<String, E> variables;
+    private final int index;
+    private final List<E> match;
+    private final Map<String, E> variables;
 
-    public Match(int index, Map<String, E> variables) {
+    public Match(int index, List<E> match, Map<String, E> variables) {
         this.index = index;
+        this.match = match;
         this.variables = variables;
     }
 
-    public int getIndex() {
+    public int getMatchFromIndex() {
         return index;
+    }
+
+    public int getMatchToIndex() {
+        return index + match.size();
+    }
+
+    public List<E> getMatchedSubsequence() {
+        return match;
     }
 
     public Map<String, E> getVariables() {
@@ -29,7 +40,7 @@ public class Match<E> {
 
     @Override
     public String toString() {
-        return "Match [index=" + index + ", variables=" + variables + "]";
+        return "Match [index=" + index + ", match=" + match + ", variables=" + variables + "]";
     }
 
     @Override

@@ -10,7 +10,7 @@ public abstract class EnhancedMatcher<E> implements Matcher<E> {
         this.context = context;
     }
 
-    public CapturingMatcher<E> captureAs(String name) {
+    public EnhancedMatcher<E> captureAs(String name) {
         return new CapturingMatcher<E>(name, this);
     }
 
@@ -18,8 +18,28 @@ public abstract class EnhancedMatcher<E> implements Matcher<E> {
         return Matchers.or(this, other);
     }
 
+    public EnhancedMatcher<E> optional() {
+        return new OptionalMatcher<E>(this);
+    }
+
+    public EnhancedMatcher<E> oneOrMoreGreedy() {
+        return new OneOrMoreGreedyMatcher<E>(this);
+    }
+
+    public EnhancedMatcher<E> zeroOrMoreGreedy() {
+        return new ZeroOrMoreGreedyMatcher<E>(this);
+    }
+
+    public EnhancedMatcher<E> oneOrMore() {
+        return new OneOrMoreLazyMatcher<E>(this);
+    }
+
+    public EnhancedMatcher<E> zeroOrMore() {
+        return new ZeroOrMoreLazyMatcher<E>(this);
+    }
+
     @Override
     public String toString() {
-        return "AbstractMatcher";
+        return "toString() not overriden!";
     }
 }

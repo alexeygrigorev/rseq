@@ -17,21 +17,13 @@ public class Word {
         return token;
     }
 
-    public void setToken(String token) {
-        this.token = token;
-    }
-
     public String getPos() {
         return pos;
     }
 
-    public void setPos(String pos) {
-        this.pos = pos;
-    }
-
     @Override
     public String toString() {
-        return "Word [token=" + token + ", pos=" + pos + "]";
+        return token + "/" + pos;
     }
 
     @Override

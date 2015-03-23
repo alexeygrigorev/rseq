@@ -4,9 +4,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 
-public class MatchingContext<E> {
+class MatchingContext<E> {
 
     private final Map<String, E> variables = new HashMap<String, E>();
     private final List<Match<E>> results = new ArrayList<Match<E>>();
@@ -15,6 +16,7 @@ public class MatchingContext<E> {
     private final List<E> sequence;
 
     private int index = 0;
+    private ListIterator<E> currentListIterator;
 
     public MatchingContext(List<EnhancedMatcher<E>> pattern, List<E> sequence) {
         this.pattern = pattern;
@@ -22,13 +24,16 @@ public class MatchingContext<E> {
     }
 
     public void addSuccessfulMatch() {
-        Match<E> match = new Match<E>(index, new HashMap<String, E>(variables));
-        results.add(match);
-        index = index + pattern.size() - 1;
-    }
+        if (currentListIterator == null) {
+            throw new IllegalStateException("currentListIterator must be initialized already");
+        }
 
-    public List<Match<E>> getAllResults() {
-        return results;
+        int nextIndex = currentListIterator.nextIndex();
+        List<E> matchedSubsequence = new ArrayList<E>(sequence.subList(index, nextIndex));
+        Match<E> match = new Match<E>(index, matchedSubsequence, new HashMap<String, E>(variables));
+        results.add(match);
+        variables.clear();
+        index = nextIndex - 1;
     }
 
     public void setVariable(String name, E value) {
@@ -39,11 +44,19 @@ public class MatchingContext<E> {
         return variables.get(name);
     }
 
+    public List<Match<E>> getAllResults() {
+        return results;
+    }
+
+    public List<EnhancedMatcher<E>> getPattern() {
+        return pattern;
+    }
+
     public Iterator<Void> findIterator() {
         return new Iterator<Void>() {
             @Override
             public boolean hasNext() {
-                return index < sequence.size() - pattern.size() + 1;
+                return index < sequence.size();
             }
 
             @Override
@@ -60,7 +73,12 @@ public class MatchingContext<E> {
     }
 
     public Iterator<E> matchIterator() {
-        return sequence.listIterator(index);
+        currentListIterator = sequence.listIterator(index);
+        return currentListIterator;
+    }
+
+    ListIterator<E> getCurrentMatchIterator() {
+        return currentListIterator;
     }
 
 }

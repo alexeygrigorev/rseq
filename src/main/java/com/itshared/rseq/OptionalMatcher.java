@@ -1,22 +1,20 @@
 package com.itshared.rseq;
 
-class CapturingMatcher<E> extends EnhancedMatcher<E> {
+class OptionalMatcher<E> extends EnhancedMatcher<E> implements OptionalMatcherMarker {
 
-    private String name;
     private Matcher<E> matcher;
 
-    public CapturingMatcher(String name, Matcher<E> matcher) {
-        this.name = name;
+    public OptionalMatcher(Matcher<E> matcher) {
         this.matcher = matcher;
     }
 
     @Override
     public boolean match(E e) {
         if (matcher.match(e)) {
-            context.setVariable(name, e);
             return true;
         }
-        return false;
+        context.getCurrentMatchIterator().previous();
+        return true;
     }
 
     @Override
@@ -28,8 +26,12 @@ class CapturingMatcher<E> extends EnhancedMatcher<E> {
     }
 
     @Override
-    public String toString() {
-        return name + "=[" + matcher + "]";
+    public EnhancedMatcher<E> captureAs(String name) {
+        throw new UnsupportedOperationException("Capturing optional matchers is not yet supported");
     }
 
+    @Override
+    public String toString() {
+        return "[" + matcher.toString() + "]?";
+    }
 }

@@ -26,6 +26,13 @@ public class Pattern<E> {
             boolean success = true;
 
             for (EnhancedMatcher<E> matcher : matchers) {
+                if (!matchIterator.hasNext()) {
+                    if (matcher instanceof OptionalMatcherMarker) {
+                        continue;
+                    }
+                    success = false;
+                    break;
+                }
                 E next = matchIterator.next();
                 if (!matcher.match(next)) {
                     success = false;
@@ -40,6 +47,34 @@ public class Pattern<E> {
         }
 
         return context.getAllResults();
+    }
+
+    public List<E> replace(List<E> sequence, MatchTransformer<E> transformer) {
+        List<Match<E>> matches = find(sequence);
+        return replace(sequence, matches, transformer);
+    }
+
+    private List<E> replace(List<E> sequence, List<Match<E>> matches, MatchTransformer<E> transformer) {
+        if (matches.isEmpty()) {
+            return sequence;
+        }
+
+        List<E> result = new ArrayList<E>(sequence.size() - matches.size());
+        Iterator<Match<E>> iterator = matches.iterator();
+
+        int notMatchedFrom = 0;
+        int notMatchedTo = -1;
+        while (iterator.hasNext()) {
+            Match<E> match = iterator.next();
+
+            notMatchedTo = match.getMatchFromIndex();
+            result.addAll(sequence.subList(notMatchedFrom, notMatchedTo));
+            result.addAll(transformer.transform(match));
+            notMatchedFrom = match.getMatchToIndex();
+        }
+
+        result.addAll(sequence.subList(notMatchedTo, sequence.size()));
+        return result;
     }
 
     @SafeVarargs

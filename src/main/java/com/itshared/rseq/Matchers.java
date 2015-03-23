@@ -7,6 +7,20 @@ public class Matchers {
     private Matchers() {
     }
 
+    public static <E> EnhancedMatcher<E> anything() {
+        return new EnhancedMatcher<E>() {
+            @Override
+            public boolean match(E e) {
+                return true;
+            }
+
+            @Override
+            public String toString() {
+                return ".";
+            }
+        };
+    }
+
     public static <E> EnhancedMatcher<E> eq(final E other) {
         return new EnhancedMatcher<E>() {
             @Override

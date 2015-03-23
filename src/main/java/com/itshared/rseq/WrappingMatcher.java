@@ -1,6 +1,6 @@
 package com.itshared.rseq;
 
-public class WrappingMatcher<E> extends EnhancedMatcher<E> {
+class WrappingMatcher<E> extends EnhancedMatcher<E> {
 
     public static <E> EnhancedMatcher<E> wrap(Matcher<E> matcher) {
         if (matcher instanceof EnhancedMatcher) {
