@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Test;
 
@@ -220,7 +221,6 @@ public class WordMatcherTest {
         assertEquals(expectedMatches, matches);
     }
 
-
     @Test
     public void findPattern_optional_last() {
         List<Word> sentence = Arrays.asList(w("p", "LNK"));
@@ -271,6 +271,127 @@ public class WordMatcherTest {
         List<Match<Word>> expectedMatches = Arrays.asList(match1, match2, match3);
 
         assertEquals(expectedMatches, matches);
+    }
+
+    @Test
+    public void findPattern_oneOrMoreLazy() {
+        List<Word> sentence = Arrays.asList(
+                w("p", "LNK"), w("w", "LNK"), w(",", ","), w(",", ","), w(",", ","),
+                w("token", "POS"), w("p", "LNK"), w("w", "LNK"), w("i", "LNK"), w(",", ","), w(",", ","), 
+                w("w", "LNK"));
+
+        EnhancedMatcher<Word> any = Matchers.anything();
+        EnhancedMatcher<Word> comma = BeanMatchers.eq(Word.class, "token", ",");
+
+        Pattern<Word> pattern = Pattern.create(any.oneOrMore(), comma.zeroOrMore());
+        List<Match<Word>> matches = pattern.find(sentence);
+
+        Map<String, Word> variables = Collections.emptyMap();
+        Match<Word> match1 = new Match<Word>(0, sentence.subList(0, 5), variables);
+        Match<Word> match2 = new Match<Word>(5, sentence.subList(5, 5 + 6), variables);
+        Match<Word> match3 = new Match<Word>(11, sentence.subList(11, 11 + 1), variables);
+        List<Match<Word>> expectedMatches = Arrays.asList(match1, match2, match3);
+
+        assertEquals(expectedMatches, matches);
+    }
+
+    @Test
+    public void findPattern_zeroOrMoreLazy_noMatchForFirstMatcher() {
+        List<Word> sentence = Arrays.asList(w("w", "LNK"), w(",", ","), w("i", "LNK"), w(",", ","),
+                w(",", ","), w("i", "LNK"));
+
+        EnhancedMatcher<Word> dot = BeanMatchers.eq(Word.class, "token", ".");
+        EnhancedMatcher<Word> comma = BeanMatchers.eq(Word.class, "token", ",");
+
+        Pattern<Word> pattern = Pattern.create(dot.zeroOrMore(), comma.zeroOrMore(), word("i"));
+        List<Match<Word>> matches = pattern.find(sentence);
+
+        Map<String, Word> variables = Collections.emptyMap();
+        Match<Word> match1 = new Match<Word>(1, sentence.subList(1, 1 + 2), variables);
+        Match<Word> match2 = new Match<Word>(3, sentence.subList(3, 3 + 3), variables);
+        List<Match<Word>> expectedMatches = Arrays.asList(match1, match2);
+
+        assertEquals(expectedMatches, matches);
+    }
+
+    
+    @Test
+    public void replacePattern_oneComma_everything() {
+        List<Word> sentence = Arrays.asList(w(",", ","), w(",", ","), w(",", ","), w(",", ","));
+
+        EnhancedMatcher<Word> comma = BeanMatchers.eq(Word.class, "token", ",");
+        Pattern<Word> pattern = Pattern.create(comma.oneOrMore());
+
+        List<Word> result = pattern.replace(sentence, new MatchTransformer<Word>() {
+            @Override
+            public List<Word> transform(Match<Word> match) {
+                return Arrays.asList(new Word(",", ","));
+            }
+        });
+
+        List<Word> expectedResult = Arrays.asList(new Word(",", ","));
+        assertEquals(expectedResult, result);
+    }
+
+    @Test
+    public void replacePattern_contentInQuotes() {
+        Word quoteWord = w("'", "'");
+        List<Word> sentence = Arrays.asList(quoteWord, w("a", "POS"), w("b", "POS"), quoteWord, w("c", "POS"),
+                w("d", "POS"), w("e", "POS"), w("f", "POS"), quoteWord, w("g", "POS"), w("h", "POS"), quoteWord);
+
+        EnhancedMatcher<Word> any = Matchers.anything();
+        EnhancedMatcher<Word> quote = Matchers.eq(quoteWord);
+        Pattern<Word> pattern = Pattern.create(quote, any.zeroOrMore(), quote);
+
+        List<Word> result = pattern.replace(sentence, new OneElementOutputTransformer<Word>() {
+            @Override
+            public Word convert(Match<Word> match) {
+                List<String> toJoin = new ArrayList<String>();
+                for (Word word : match.getMatchedSubsequence()) {
+                    toJoin.add(word.getToken());
+                }
+                String joined = StringUtils.join(toJoin.subList(1, toJoin.size() - 1), " ");
+                return new Word("'" + joined + "'", "Q");
+            }
+        });
+
+        List<Word> expectedResult =  Arrays.asList(w("'a b'", "Q"), w("c", "POS"),
+                w("d", "POS"), w("e", "POS"), w("f", "POS"), w("'g h'", "Q"));
+        assertEquals(expectedResult, result);
+    }
+    
+    @Test
+    public void replacePattern_oneComma_oneOrMore() {
+        List<Word> sentence = Arrays.asList(w(",", ","), w(",", ","), w(",", ","), w("w", "LNK"),
+                w(",", ","), w("token", "POS"), w("p", "LNK"), w(",", ","), w(",", ","), w("w", "LNK"),
+                w("i", "LNK"), w(",", ","), w(",", ","), w("w", "LNK"), w(",", ","), w(",", ","));
+        
+        EnhancedMatcher<Word> comma = BeanMatchers.eq(Word.class, "token", ",");
+        Pattern<Word> pattern = Pattern.create(comma.oneOrMore());
+
+        List<Match<Word>> matches = pattern.find(sentence);
+
+        Map<String, Word> variables = Collections.emptyMap();
+        Match<Word> match1 = new Match<Word>(0, sentence.subList(0, 3), variables);
+        Match<Word> match2 = new Match<Word>(4, sentence.subList(4, 4 + 1), variables);
+        Match<Word> match3 = new Match<Word>(7, sentence.subList(7, 7 + 2), variables);
+        Match<Word> match4 = new Match<Word>(11, sentence.subList(11, 11 + 2), variables);
+        Match<Word> match5 = new Match<Word>(14, sentence.subList(14, 14 + 2), variables);
+
+        List<Match<Word>> expectedMatches = Arrays.asList(match1, match2, match3, match4, match5);
+        assertEquals(expectedMatches, matches);
+
+        List<Word> result = pattern.replace(sentence, new MatchTransformer<Word>() {
+            @Override
+            public List<Word> transform(Match<Word> match) {
+                return Arrays.asList(new Word(",", ","));
+            }
+        });
+
+        List<Word> expectedResult = Arrays.asList(w(",", ","), w("w", "LNK"),
+                w(",", ","), w("token", "POS"), w("p", "LNK"), w(",", ","), w("w", "LNK"),
+                w("i", "LNK"), w(",", ","), w("w", "LNK"), w(",", ","));
+        assertEquals(expectedResult, result);
     }
 
     public static Word w(String word, String tag) {

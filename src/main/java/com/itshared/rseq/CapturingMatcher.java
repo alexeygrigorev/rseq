@@ -1,35 +1,26 @@
 package com.itshared.rseq;
 
-class CapturingMatcher<E> extends EnhancedMatcher<E> {
+class CapturingMatcher<E> extends DelegatingMatcher<E> {
 
     private String name;
-    private Matcher<E> matcher;
 
     public CapturingMatcher(String name, Matcher<E> matcher) {
+        super(matcher);
         this.name = name;
-        this.matcher = matcher;
     }
 
     @Override
-    public boolean match(E e) {
-        if (matcher.match(e)) {
-            context.setVariable(name, e);
+    public boolean match(E object) {
+        if (delegateMatch(object)) {
+            context().setVariable(name, object);
             return true;
         }
         return false;
     }
 
     @Override
-    public void initialize(MatchingContext<E> context) {
-        super.initialize(context);
-        if (matcher instanceof EnhancedMatcher) {
-            ((EnhancedMatcher<E>) matcher).initialize(context);
-        }
-    }
-
-    @Override
     public String toString() {
-        return name + "=[" + matcher + "]";
+        return name + "=[" + delegateToString() + "]";
     }
 
 }

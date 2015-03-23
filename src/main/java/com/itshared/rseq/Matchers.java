@@ -10,7 +10,7 @@ public class Matchers {
     public static <E> EnhancedMatcher<E> anything() {
         return new EnhancedMatcher<E>() {
             @Override
-            public boolean match(E e) {
+            public boolean match(E object) {
                 return true;
             }
 
@@ -24,8 +24,8 @@ public class Matchers {
     public static <E> EnhancedMatcher<E> eq(final E other) {
         return new EnhancedMatcher<E>() {
             @Override
-            public boolean match(E e) {
-                return Objects.equals(e, other);
+            public boolean match(E object) {
+                return Objects.equals(object, other);
             }
 
             @Override
@@ -38,8 +38,8 @@ public class Matchers {
     public static <E> EnhancedMatcher<E> or(final Matcher<E> a, final Matcher<E> b) {
         return new EnhancedMatcher<E>() {
             @Override
-            public boolean match(E e) {
-                return a.match(e) || b.match(e);
+            public boolean match(E object) {
+                return a.match(object) || b.match(object);
             }
 
             @Override
@@ -52,8 +52,8 @@ public class Matchers {
     public static <E> EnhancedMatcher<E> and(final Matcher<E> a, final Matcher<E> b) {
         return new EnhancedMatcher<E>() {
             @Override
-            public boolean match(E e) {
-                return a.match(e) && b.match(e);
+            public boolean match(E object) {
+                return a.match(object) && b.match(object);
             }
 
             @Override
@@ -66,8 +66,8 @@ public class Matchers {
     public static <E> EnhancedMatcher<E> not(final Matcher<E> matcher) {
         return new EnhancedMatcher<E>() {
             @Override
-            public boolean match(E e) {
-                return !matcher.match(e);
+            public boolean match(E object) {
+                return !matcher.match(object);
             }
 
             @Override
@@ -80,8 +80,8 @@ public class Matchers {
     public static <E> EnhancedMatcher<E> isNull() {
         return new EnhancedMatcher<E>() {
             @Override
-            public boolean match(E e) {
-                return e == null;
+            public boolean match(E object) {
+                return object == null;
             }
 
             @Override

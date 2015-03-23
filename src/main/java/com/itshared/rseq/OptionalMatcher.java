@@ -1,28 +1,18 @@
 package com.itshared.rseq;
 
-class OptionalMatcher<E> extends EnhancedMatcher<E> implements OptionalMatcherMarker {
-
-    private Matcher<E> matcher;
+class OptionalMatcher<E> extends DelegatingMatcher<E> implements OptionalMatcherMarker {
 
     public OptionalMatcher(Matcher<E> matcher) {
-        this.matcher = matcher;
+        super(matcher);
     }
 
     @Override
-    public boolean match(E e) {
-        if (matcher.match(e)) {
+    public boolean match(E object) {
+        if (delegateMatch(object)) {
             return true;
         }
-        context.getCurrentMatchIterator().previous();
+        context().getCurrentMatchIterator().previous();
         return true;
-    }
-
-    @Override
-    public void initialize(MatchingContext<E> context) {
-        super.initialize(context);
-        if (matcher instanceof EnhancedMatcher) {
-            ((EnhancedMatcher<E>) matcher).initialize(context);
-        }
     }
 
     @Override
@@ -32,6 +22,6 @@ class OptionalMatcher<E> extends EnhancedMatcher<E> implements OptionalMatcherMa
 
     @Override
     public String toString() {
-        return "[" + matcher.toString() + "]?";
+        return "[" + delegateToString() + "]?";
     }
 }

@@ -36,8 +36,8 @@ public class BeanMatchers {
 
         return new EnhancedMatcher<E>() {
             @Override
-            public boolean match(E e) {
-                String value = extractor.get(e);
+            public boolean match(E object) {
+                String value = extractor.get(object);
                 return pattern.matcher(value).matches();
             }
 

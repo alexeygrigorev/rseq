@@ -12,13 +12,13 @@ class MatchingContext<E> {
     private final Map<String, E> variables = new HashMap<String, E>();
     private final List<Match<E>> results = new ArrayList<Match<E>>();
 
-    private final List<EnhancedMatcher<E>> pattern;
+    private final List<Matcher<E>> pattern;
     private final List<E> sequence;
 
     private int index = 0;
     private ListIterator<E> currentListIterator;
 
-    public MatchingContext(List<EnhancedMatcher<E>> pattern, List<E> sequence) {
+    public MatchingContext(List<Matcher<E>> pattern, List<E> sequence) {
         this.pattern = pattern;
         this.sequence = sequence;
     }
@@ -48,7 +48,7 @@ class MatchingContext<E> {
         return results;
     }
 
-    public List<EnhancedMatcher<E>> getPattern() {
+    public List<Matcher<E>> getPattern() {
         return pattern;
     }
 

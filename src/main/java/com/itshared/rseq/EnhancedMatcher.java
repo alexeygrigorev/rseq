@@ -2,13 +2,7 @@ package com.itshared.rseq;
 
 public abstract class EnhancedMatcher<E> implements Matcher<E> {
 
-    protected MatchingContext<E> context;
-
-    public abstract boolean match(E e);
-
-    public void initialize(MatchingContext<E> context) {
-        this.context = context;
-    }
+    public abstract boolean match(E object);
 
     public EnhancedMatcher<E> captureAs(String name) {
         return new CapturingMatcher<E>(name, this);

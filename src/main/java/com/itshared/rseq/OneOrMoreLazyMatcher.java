@@ -1,37 +1,55 @@
 package com.itshared.rseq;
 
+import java.util.List;
 import java.util.ListIterator;
 
-class OneOrMoreLazyMatcher<E> extends EnhancedMatcher<E> {
+class OneOrMoreLazyMatcher<E> extends OneOrMoreGreedyMatcher<E> {
 
-    private final Matcher<E> matcher;
+    private DelegatingMatcher<E> nextMatcher;
 
     public OneOrMoreLazyMatcher(Matcher<E> matcher) {
-        this.matcher = matcher;
+        super(matcher);
     }
 
     @Override
-    public boolean match(E e) {
-        if (matcher.match(e)) {
-            ListIterator<E> currentIterator = context.getCurrentMatchIterator();
-            while (currentIterator.hasNext()) {
-                E next = currentIterator.next();
-                if (!matcher.match(next)) {
-                    currentIterator.previous();
-                    break;
-                }
+    public void initialize(MatchingContext<E> context, int index) {
+        super.initialize(context, index);
+        this.nextMatcher = null;
+
+        List<Matcher<E>> pattern = context.getPattern();
+        if (index + 1 < pattern.size()) {
+            Matcher<E> nextMatcher = pattern.get(index + 1);
+            this.nextMatcher = DelegatingMatcher.wrap(nextMatcher);
+        }
+    }
+
+    @Override
+    public boolean match(E object) {
+        if (nextMatcher == null) {
+            return super.match(object);
+        }
+
+        if (!delegateMatch(object)) {
+            return false;
+        }
+
+        ListIterator<E> currentIterator = context().getCurrentMatchIterator();
+        while (currentIterator.hasNext()) {
+            E next = currentIterator.next();
+            boolean currentMatch = delegateMatch(next);
+            boolean nextMatch = nextMatcher.unwrappingMatch(next);
+
+            if (!currentMatch) {
+                currentIterator.previous();
+                break;
             }
-            return true;
-        }
-        return false;
-    }
 
-    @Override
-    public void initialize(MatchingContext<E> context) {
-        super.initialize(context);
-        if (matcher instanceof EnhancedMatcher) {
-            ((EnhancedMatcher<E>) matcher).initialize(context);
+            if (currentMatch && nextMatch) {
+                currentIterator.previous();
+                break;
+            }
         }
+        return true;
     }
 
     @Override
@@ -41,6 +59,6 @@ class OneOrMoreLazyMatcher<E> extends EnhancedMatcher<E> {
 
     @Override
     public String toString() {
-        return "[" + matcher.toString() + "]+?";
+        return "[" + delegateToString() + "]+?";
     }
 }

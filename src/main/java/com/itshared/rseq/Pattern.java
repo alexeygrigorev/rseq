@@ -7,17 +7,15 @@ import java.util.List;
 
 public class Pattern<E> {
 
-    private final List<EnhancedMatcher<E>> matchers;
+    private final List<Matcher<E>> matchers;
 
-    private Pattern(List<EnhancedMatcher<E>> matchers) {
+    private Pattern(List<Matcher<E>> matchers) {
         this.matchers = matchers;
     }
 
     public List<Match<E>> find(List<E> sequence) {
         MatchingContext<E> context = new MatchingContext<E>(matchers, sequence);
-        for (EnhancedMatcher<E> matcher : matchers) {
-            matcher.initialize(context);
-        }
+        initialize(context);
 
         // TODO: no need for iterator
         Iterator<Void> iterator = context.findIterator();
@@ -25,7 +23,7 @@ public class Pattern<E> {
             Iterator<E> matchIterator = context.matchIterator();
             boolean success = true;
 
-            for (EnhancedMatcher<E> matcher : matchers) {
+            for (Matcher<E> matcher : matchers) {
                 if (!matchIterator.hasNext()) {
                     if (matcher instanceof OptionalMatcherMarker) {
                         continue;
@@ -47,6 +45,15 @@ public class Pattern<E> {
         }
 
         return context.getAllResults();
+    }
+
+    private void initialize(MatchingContext<E> context) {
+        for (int index = 0; index < matchers.size(); index++) {
+            Matcher<E> matcher = matchers.get(index);
+            if (matcher instanceof ContextAwareMatcher) {
+                ((ContextAwareMatcher<E>) matcher).initialize(context, index);
+            }
+        }
     }
 
     public List<E> replace(List<E> sequence, MatchTransformer<E> transformer) {
@@ -73,7 +80,7 @@ public class Pattern<E> {
             notMatchedFrom = match.getMatchToIndex();
         }
 
-        result.addAll(sequence.subList(notMatchedTo, sequence.size()));
+        result.addAll(sequence.subList(notMatchedFrom, sequence.size()));
         return result;
     }
 
@@ -83,11 +90,7 @@ public class Pattern<E> {
     }
 
     public static <E> Pattern<E> create(List<Matcher<E>> matchers) {
-        List<EnhancedMatcher<E>> list = new ArrayList<EnhancedMatcher<E>>();
-        for (Matcher<E> matcher : matchers) {
-            list.add(WrappingMatcher.wrap(matcher));
-        }
-        return new Pattern<E>(list);
+        return new Pattern<E>(matchers);
     }
 
 }

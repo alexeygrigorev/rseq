@@ -2,37 +2,29 @@ package com.itshared.rseq;
 
 import java.util.ListIterator;
 
-class ZeroOrMoreGreedyMatcher<E> extends EnhancedMatcher<E> implements OptionalMatcherMarker {
-
-    private final Matcher<E> matcher;
+class ZeroOrMoreGreedyMatcher<E> extends DelegatingMatcher<E> implements OptionalMatcherMarker {
 
     public ZeroOrMoreGreedyMatcher(Matcher<E> matcher) {
-        this.matcher = matcher;
+        super(matcher);
     }
 
     @Override
-    public boolean match(E e) {
-        ListIterator<E> currentIterator = context.getCurrentMatchIterator();
-        if (matcher.match(e)) {
-            while (currentIterator.hasNext()) {
-                E next = currentIterator.next();
-                if (!matcher.match(next)) {
-                    currentIterator.previous();
-                    break;
-                }
-            }
+    public boolean match(E object) {
+        ListIterator<E> currentIterator = context().getCurrentMatchIterator();
+        if (!delegateMatch(object)) {
+            currentIterator.previous();
             return true;
         }
-        currentIterator.previous();
-        return true;
-    }
 
-    @Override
-    public void initialize(MatchingContext<E> context) {
-        super.initialize(context);
-        if (matcher instanceof EnhancedMatcher) {
-            ((EnhancedMatcher<E>) matcher).initialize(context);
+        while (currentIterator.hasNext()) {
+            E next = currentIterator.next();
+            if (!delegateMatch(next)) {
+                currentIterator.previous();
+                break;
+            }
         }
+
+        return true;
     }
 
     @Override
@@ -42,7 +34,7 @@ class ZeroOrMoreGreedyMatcher<E> extends EnhancedMatcher<E> implements OptionalM
 
     @Override
     public String toString() {
-        return "[" + matcher.toString() + "]*";
+        return "[" + delegateToString() + "]*";
     }
 
 }
