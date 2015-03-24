@@ -322,7 +322,7 @@ public class WordMatcherTest {
         EnhancedMatcher<Word> comma = BeanMatchers.eq(Word.class, "token", ",");
         Pattern<Word> pattern = Pattern.create(comma.oneOrMore());
 
-        List<Word> result = pattern.replace(sentence, new MatchTransformer<Word>() {
+        List<Word> result = pattern.replaceMatched(sentence, new MatchTransformer<Word>() {
             @Override
             public List<Word> transform(Match<Word> match) {
                 return Arrays.asList(new Word(",", ","));
@@ -343,11 +343,11 @@ public class WordMatcherTest {
         EnhancedMatcher<Word> quote = Matchers.eq(quoteWord);
         Pattern<Word> pattern = Pattern.create(quote, any.zeroOrMore(), quote);
 
-        List<Word> result = pattern.replace(sentence, new OneElementOutputTransformer<Word>() {
+        List<Word> result = pattern.replace(sentence, new Transformer<Word>() {
             @Override
-            public Word convert(Match<Word> match) {
+            public Word transform(List<Word> match) {
                 List<String> toJoin = new ArrayList<String>();
-                for (Word word : match.getMatchedSubsequence()) {
+                for (Word word : match) {
                     toJoin.add(word.getToken());
                 }
                 String joined = StringUtils.join(toJoin.subList(1, toJoin.size() - 1), " ");
@@ -381,7 +381,7 @@ public class WordMatcherTest {
         List<Match<Word>> expectedMatches = Arrays.asList(match1, match2, match3, match4, match5);
         assertEquals(expectedMatches, matches);
 
-        List<Word> result = pattern.replace(sentence, new MatchTransformer<Word>() {
+        List<Word> result = pattern.replaceMatched(sentence, new MatchTransformer<Word>() {
             @Override
             public List<Word> transform(Match<Word> match) {
                 return Arrays.asList(new Word(",", ","));

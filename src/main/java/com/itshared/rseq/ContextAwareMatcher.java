@@ -1,6 +1,6 @@
 package com.itshared.rseq;
 
-public interface ContextAwareMatcher<E> extends Matcher<E> {
+interface ContextAwareMatcher<E> extends Matcher<E> {
 
     /**
      * 

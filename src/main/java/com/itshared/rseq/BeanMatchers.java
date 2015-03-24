@@ -6,11 +6,36 @@ import java.util.regex.Pattern;
 
 import com.itshared.rseq.ReflectionUtils.ValueExtractor;
 
+/**
+ * Utility class with convenience methods for creating matchers that work on
+ * java-bean classes: that is, classes with getters that follow the bean
+ * convention. It can use reflection to compare the content of the java bean
+ * properties:<br>
+ * 
+ * <ul>
+ * <li>to test equality, {@link #eq(Class, String, Object)} method,</li>
+ * <li>regular expression match - only for string properties,
+ * {@link #regex(Class, String, String)} method</li>
+ * <li>in set - to check if the property values is contained is some set,
+ * {@link #in(Class, String, Set)} method</li>
+ * </ul>
+ * 
+ * @author Alexey Grigorev
+ *
+ */
 public class BeanMatchers {
 
     private BeanMatchers() {
     }
 
+    /**
+     * Creates a matcher that checks if the java bean's property is equal to the provided 
+     * value
+     * 
+     * @param otherClass java bean's class
+     * @param propertyName property of the java bean
+     * @param otherValue value to check against
+     */
     public static <O, V> EnhancedMatcher<O> eq(final Class<O> otherClass, final String propertyName,
             final V otherValue) {
         final ValueExtractor<O, V> extractor = ReflectionUtils.property(otherClass, propertyName);
