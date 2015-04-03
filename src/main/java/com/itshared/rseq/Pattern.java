@@ -60,6 +60,7 @@ public class Pattern<E> {
                     success = false;
                     break;
                 }
+                context.nextMatcher();
                 E next = matchIterator.next();
                 if (!matcher.match(next)) {
                     success = false;

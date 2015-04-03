@@ -53,11 +53,6 @@ class OneOrMoreLazyMatcher<E> extends OneOrMoreGreedyMatcher<E> {
     }
 
     @Override
-    public EnhancedMatcher<E> captureAs(String name) {
-        throw new UnsupportedOperationException("Capturing wildcard matchers is not yet supported");
-    }
-
-    @Override
     public String toString() {
         return "[" + delegateToString() + "]+?";
     }

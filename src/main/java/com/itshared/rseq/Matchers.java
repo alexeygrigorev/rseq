@@ -7,18 +7,24 @@ public class Matchers {
     private Matchers() {
     }
 
-    public static <E> EnhancedMatcher<E> anything() {
-        return new EnhancedMatcher<E>() {
-            @Override
-            public boolean match(E object) {
-                return true;
-            }
+    private static final AnythingMatcher<Object> ANYTHING_MATCHER = new AnythingMatcher<Object>();
 
-            @Override
-            public String toString() {
-                return ".";
-            }
-        };
+    private static class AnythingMatcher<E> extends EnhancedMatcher<E> implements OptionalMatcherMarker {
+        @Override
+        public boolean match(E object) {
+            return true;
+        }
+
+        @Override
+        public String toString() {
+            return ".";
+        }
+    }
+
+    public static <E> EnhancedMatcher<E> anything() {
+        @SuppressWarnings("unchecked")
+        AnythingMatcher<E> result = (AnythingMatcher<E>) ANYTHING_MATCHER;
+        return result;
     }
 
     public static <E> EnhancedMatcher<E> eq(final E other) {

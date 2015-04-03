@@ -10,12 +10,14 @@ import java.util.Map;
 class MatchingContext<E> {
 
     private final Map<String, E> variables = new HashMap<String, E>();
+    private final Map<String, List<E>> groups = new HashMap<String, List<E>>();
     private final List<Match<E>> results = new ArrayList<Match<E>>();
 
     private final List<Matcher<E>> pattern;
     private final List<E> sequence;
 
     private int index = 0;
+    private int currentMatcherIndex = 0;
     private ListIterator<E> currentListIterator;
 
     public MatchingContext(List<Matcher<E>> pattern, List<E> sequence) {
@@ -30,9 +32,12 @@ class MatchingContext<E> {
 
         int nextIndex = currentListIterator.nextIndex();
         List<E> matchedSubsequence = new ArrayList<E>(sequence.subList(index, nextIndex));
-        Match<E> match = new Match<E>(index, matchedSubsequence, new HashMap<String, E>(variables));
+        Map<String, E> variablesCopy = new HashMap<>(variables);
+        Map<String, List<E>> groupsCopy = new HashMap<>(groups);
+        Match<E> match = new Match<E>(index, matchedSubsequence, variablesCopy, groupsCopy);
         results.add(match);
         variables.clear();
+        groups.clear();
         index = nextIndex - 1;
     }
 
@@ -79,6 +84,16 @@ class MatchingContext<E> {
 
     ListIterator<E> getCurrentMatchIterator() {
         return currentListIterator;
+    }
+
+    void captureGroup(String name) {
+        int currentIndex = currentListIterator.nextIndex();
+        List<E> capturedGroup = new ArrayList<E>(sequence.subList(currentMatcherIndex, currentIndex));
+        groups.put(name, capturedGroup);
+    }
+
+    void nextMatcher() {
+        currentMatcherIndex = currentListIterator.nextIndex() - 1;
     }
 
 }

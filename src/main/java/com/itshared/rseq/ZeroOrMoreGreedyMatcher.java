@@ -29,7 +29,7 @@ class ZeroOrMoreGreedyMatcher<E> extends DelegatingMatcher<E> implements Optiona
 
     @Override
     public EnhancedMatcher<E> captureAs(String name) {
-        throw new UnsupportedOperationException("Capturing wildcard matchers is not yet supported");
+        return new CapturingGroupMatcher<E>(name, this);
     }
 
     @Override

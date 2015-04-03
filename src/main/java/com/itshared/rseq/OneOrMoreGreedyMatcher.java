@@ -26,7 +26,7 @@ class OneOrMoreGreedyMatcher<E> extends DelegatingMatcher<E> {
 
     @Override
     public EnhancedMatcher<E> captureAs(String name) {
-        throw new UnsupportedOperationException("Capturing wildcard matchers is not yet supported");
+        return new CapturingGroupMatcher<E>(name, this);
     }
 
     @Override
