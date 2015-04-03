@@ -2,11 +2,13 @@ package com.itshared.rseq;
 
 class CapturingGroupMatcher<E> extends DelegatingMatcher<E> {
 
-    private String name;
+    private final String name;
+    private final ParentMatcher<E> delegate;
 
-    public CapturingGroupMatcher(String name, Matcher<E> matcher) {
+    public CapturingGroupMatcher(String name, ParentMatcher<E> matcher) {
         super(matcher);
         this.name = name;
+        this.delegate = matcher;
     }
 
     @Override
@@ -19,8 +21,14 @@ class CapturingGroupMatcher<E> extends DelegatingMatcher<E> {
     }
 
     @Override
+    int register(MatchingContext<E> context) {
+        this.index = delegate.register(context);
+        return index;
+    }
+
+    @Override
     public String toString() {
-        return name + "=[" + delegateToString() + "]";
+        return name + "={" + delegateToString() + "}";
     }
 
 }

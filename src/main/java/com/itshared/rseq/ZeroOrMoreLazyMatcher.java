@@ -3,7 +3,7 @@ package com.itshared.rseq;
 import java.util.List;
 import java.util.ListIterator;
 
-class ZeroOrMoreLazyMatcher<E> extends ZeroOrMoreGreedyMatcher<E> implements OptionalMatcherMarker {
+class ZeroOrMoreLazyMatcher<E> extends ZeroOrMoreGreedyMatcher<E> {
 
     private DelegatingMatcher<E> nextMatcher;
 
@@ -12,11 +12,10 @@ class ZeroOrMoreLazyMatcher<E> extends ZeroOrMoreGreedyMatcher<E> implements Opt
     }
 
     @Override
-    public void initialize(MatchingContext<E> context, int index) {
-        super.initialize(context, index);
+    void initialize(MatchingContext<E> context) {
         this.nextMatcher = null;
 
-        List<Matcher<E>> pattern = context.getPattern();
+        List<ParentMatcher<E>> pattern = context.getPattern();
         if (index + 1 < pattern.size()) {
             Matcher<E> nextMatcher = pattern.get(index + 1);
             this.nextMatcher = DelegatingMatcher.wrap(nextMatcher);
@@ -58,6 +57,10 @@ class ZeroOrMoreLazyMatcher<E> extends ZeroOrMoreGreedyMatcher<E> implements Opt
 
     @Override
     public String toString() {
+        if (nextMatcher == null) {
+            return super.toString();
+        }
+
         return "[" + delegateToString() + "]*?";
     }
 

@@ -1,9 +1,8 @@
 package com.itshared.rseq;
 
-abstract class DelegatingMatcher<E> extends EnhancedMatcher<E> implements ContextAwareMatcher<E> {
+abstract class DelegatingMatcher<E> extends ParentMatcher<E> {
 
     private final Matcher<E> delegate;
-    private MatchingContext<E> context;
 
     public DelegatingMatcher(Matcher<E> delegate) {
         this.delegate = delegate;
@@ -20,11 +19,12 @@ abstract class DelegatingMatcher<E> extends EnhancedMatcher<E> implements Contex
     }
 
     /**
-     * Tries to match with simplest possible matcher. Used to avoid wildcard matchers that can 
-     * use the whole sequence when testing a lazy matchers 
+     * Tries to match with simplest possible matcher. Used to avoid wildcard
+     * matchers that can use the whole sequence when testing a lazy matchers
      * 
      * @param e object to be matched with
-     * @return <code>true</code> if the underlying matcher returns <code>true</code>, <code>false</code> otherwise 
+     * @return <code>true</code> if the underlying matcher returns
+     *         <code>true</code>, <code>false</code> otherwise
      * 
      * @see ZeroOrMoreLazyMatcher
      * @see OneOrMoreLazyMatcher
@@ -38,15 +38,27 @@ abstract class DelegatingMatcher<E> extends EnhancedMatcher<E> implements Contex
     }
 
     @Override
-    public void initialize(MatchingContext<E> context, int index) {
-        this.context = context;
-        if (delegate instanceof ContextAwareMatcher) {
-            ((ContextAwareMatcher<E>) delegate).initialize(context, index);
+    public void setContext(MatchingContext<E> context) {
+        super.setContext(context);
+        if (delegate instanceof ParentMatcher) {
+            ((ParentMatcher<E>) delegate).setContext(context);
         }
     }
-
-    MatchingContext<E> context() {
-        return context;
+/*
+    @Override
+    void register(MatchingContext<E> context) {
+        if (delegate instanceof CMatcher) {
+            ((CMatcher<E>) delegate).register(context);
+        } else {
+            super.register(context);
+        }
+    }
+*/
+    @Override
+    void initialize(MatchingContext<E> context) {
+        if (delegate instanceof ParentMatcher) {
+            ((ParentMatcher<E>) delegate).initialize(context);
+        }
     }
 
     static <E> DelegatingMatcher<E> wrap(Matcher<E> matcher) {

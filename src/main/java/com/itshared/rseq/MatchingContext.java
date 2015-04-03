@@ -13,14 +13,15 @@ class MatchingContext<E> {
     private final Map<String, List<E>> groups = new HashMap<String, List<E>>();
     private final List<Match<E>> results = new ArrayList<Match<E>>();
 
-    private final List<Matcher<E>> pattern;
+    private final List<ParentMatcher<E>> pattern;
+    private final List<ParentMatcher<E>> flatPattern = new ArrayList<>();
     private final List<E> sequence;
 
     private int index = 0;
     private int currentMatcherIndex = 0;
     private ListIterator<E> currentListIterator;
 
-    public MatchingContext(List<Matcher<E>> pattern, List<E> sequence) {
+    public MatchingContext(List<ParentMatcher<E>> pattern, List<E> sequence) {
         this.pattern = pattern;
         this.sequence = sequence;
     }
@@ -53,7 +54,7 @@ class MatchingContext<E> {
         return results;
     }
 
-    public List<Matcher<E>> getPattern() {
+    public List<ParentMatcher<E>> getPattern() {
         return pattern;
     }
 
@@ -90,6 +91,11 @@ class MatchingContext<E> {
         int currentIndex = currentListIterator.nextIndex();
         List<E> capturedGroup = new ArrayList<E>(sequence.subList(currentMatcherIndex, currentIndex));
         groups.put(name, capturedGroup);
+    }
+
+    int register(ParentMatcher<E> matcher) {
+        flatPattern.add(matcher);
+        return flatPattern.size() - 1;
     }
 
     void nextMatcher() {

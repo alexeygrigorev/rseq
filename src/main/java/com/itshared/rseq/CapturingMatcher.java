@@ -20,7 +20,7 @@ class CapturingMatcher<E> extends DelegatingMatcher<E> {
 
     @Override
     public String toString() {
-        return name + "=[" + delegateToString() + "]";
+        return name + "={" + delegateToString() + "}";
     }
 
 }

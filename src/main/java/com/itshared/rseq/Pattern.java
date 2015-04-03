@@ -28,9 +28,9 @@ import java.util.List;
  */
 public class Pattern<E> {
 
-    private final List<Matcher<E>> matchers;
+    private final List<ParentMatcher<E>> matchers;
 
-    private Pattern(List<Matcher<E>> matchers) {
+    private Pattern(List<ParentMatcher<E>> matchers) {
         this.matchers = matchers;
     }
 
@@ -52,9 +52,9 @@ public class Pattern<E> {
             Iterator<E> matchIterator = context.matchIterator();
             boolean success = true;
 
-            for (Matcher<E> matcher : matchers) {
+            for (ParentMatcher<E> matcher : matchers) {
                 if (!matchIterator.hasNext()) {
-                    if (matcher instanceof OptionalMatcherMarker) {
+                    if (matcher.isOptional()) {
                         continue;
                     }
                     success = false;
@@ -78,11 +78,12 @@ public class Pattern<E> {
     }
 
     private void initialize(MatchingContext<E> context) {
-        for (int index = 0; index < matchers.size(); index++) {
-            Matcher<E> matcher = matchers.get(index);
-            if (matcher instanceof ContextAwareMatcher) {
-                ((ContextAwareMatcher<E>) matcher).initialize(context, index);
-            }
+        for (ParentMatcher<E> matcher : matchers) {
+            matcher.setContext(context);
+            matcher.register(context);
+        }
+        for (ParentMatcher<E> matcher : matchers) {
+            matcher.initialize(context);
         }
     }
 
@@ -98,8 +99,8 @@ public class Pattern<E> {
      * You can use this method then you need to replace each matched
      * subsequences by exactly one element. If you need to replace them by other
      * sequences or use any additional information (like captured variables, as
-     * provided by {@link EnhancedMatcher#captureAs(String)}), then you should
-     * use {@link #replaceMatched(List, MatchTransformer)} method instead
+     * provided by {@link ParentMatcher#captureAs(String)}), then you should use
+     * {@link #replaceMatched(List, MatchTransformer)} method instead
      * 
      * @param sequence to transform
      * @param transformer transformation to be applied to each matched
@@ -126,11 +127,10 @@ public class Pattern<E> {
      * and returns a new list. <br>
      * <br>
      * Use this method then you need some additional information about the
-     * match, like variables (e.g. from
-     * {@link EnhancedMatcher#captureAs(String)}) or when the result of the
-     * transformation is also a sequence. However in most cases you probably
-     * will need to transform each subsequence to a single element, and thus,
-     * use {@link #replace(List, Transformer)}.
+     * match, like variables (e.g. from {@link ParentMatcher#captureAs(String)})
+     * or when the result of the transformation is also a sequence. However in
+     * most cases you probably will need to transform each subsequence to a
+     * single element, and thus, use {@link #replace(List, Transformer)}.
      * 
      * @param sequence to transform
      * @param transformer transformation to be applied to each matched
@@ -165,6 +165,11 @@ public class Pattern<E> {
         return result;
     }
 
+    @Override
+    public String toString() {
+        return matchers.toString();
+    }
+
     /**
      * Creates a pattern from supplied matchers
      */
@@ -177,7 +182,7 @@ public class Pattern<E> {
      * Creates a pattern from supplied matchers
      */
     public static <E> Pattern<E> create(List<Matcher<E>> matchers) {
-        return new Pattern<E>(matchers);
+        return new Pattern<E>(ParentMatcher.wrapMatchers(matchers));
     }
 
 }

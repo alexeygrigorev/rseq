@@ -1,34 +1,34 @@
 package com.itshared.rseq;
 
-public abstract class EnhancedMatcher<E> implements Matcher<E> {
+public abstract class XMatcher<E> implements Matcher<E> {
 
     public abstract boolean match(E object);
 
-    public EnhancedMatcher<E> captureAs(String name) {
+    public XMatcher<E> captureAs(String name) {
         return new CapturingMatcher<E>(name, this);
     }
 
-    public EnhancedMatcher<E> or(Matcher<E> other) {
+    public XMatcher<E> or(Matcher<E> other) {
         return Matchers.or(this, other);
     }
 
-    public EnhancedMatcher<E> optional() {
+    public XMatcher<E> optional() {
         return new OptionalMatcher<E>(this);
     }
 
-    public EnhancedMatcher<E> oneOrMoreGreedy() {
+    public XMatcher<E> oneOrMoreGreedy() {
         return new OneOrMoreGreedyMatcher<E>(this);
     }
 
-    public EnhancedMatcher<E> zeroOrMoreGreedy() {
+    public XMatcher<E> zeroOrMoreGreedy() {
         return new ZeroOrMoreGreedyMatcher<E>(this);
     }
 
-    public EnhancedMatcher<E> oneOrMore() {
+    public XMatcher<E> oneOrMore() {
         return new OneOrMoreLazyMatcher<E>(this);
     }
 
-    public EnhancedMatcher<E> zeroOrMore() {
+    public XMatcher<E> zeroOrMore() {
         return new ZeroOrMoreLazyMatcher<E>(this);
     }
 

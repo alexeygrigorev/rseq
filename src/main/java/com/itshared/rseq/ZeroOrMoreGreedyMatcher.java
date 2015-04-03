@@ -2,7 +2,7 @@ package com.itshared.rseq;
 
 import java.util.ListIterator;
 
-class ZeroOrMoreGreedyMatcher<E> extends DelegatingMatcher<E> implements OptionalMatcherMarker {
+class ZeroOrMoreGreedyMatcher<E> extends DelegatingMatcher<E> {
 
     public ZeroOrMoreGreedyMatcher(Matcher<E> matcher) {
         super(matcher);
@@ -28,8 +28,13 @@ class ZeroOrMoreGreedyMatcher<E> extends DelegatingMatcher<E> implements Optiona
     }
 
     @Override
-    public EnhancedMatcher<E> captureAs(String name) {
+    public ParentMatcher<E> captureAs(String name) {
         return new CapturingGroupMatcher<E>(name, this);
+    }
+
+    @Override
+    boolean isOptional() {
+        return true;
     }
 
     @Override

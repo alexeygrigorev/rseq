@@ -29,18 +29,18 @@ public class BeanMatchers {
     }
 
     /**
-     * Creates a matcher that checks if the java bean's property is equal to the provided 
-     * value
+     * Creates a matcher that checks if the java bean's property is equal to the
+     * provided value
      * 
      * @param otherClass java bean's class
      * @param propertyName property of the java bean
      * @param otherValue value to check against
      */
-    public static <O, V> EnhancedMatcher<O> eq(final Class<O> otherClass, final String propertyName,
+    public static <O, V> XMatcher<O> eq(final Class<O> otherClass, final String propertyName,
             final V otherValue) {
         final ValueExtractor<O, V> extractor = ReflectionUtils.property(otherClass, propertyName);
 
-        return new EnhancedMatcher<O>() {
+        return new ParentMatcher<O>() {
             @Override
             public boolean match(O object) {
                 V value = extractor.get(object);
@@ -54,12 +54,12 @@ public class BeanMatchers {
         };
     }
 
-    public static <E> EnhancedMatcher<E> regex(final Class<E> otherClass, final String propertyName,
+    public static <E> XMatcher<E> regex(final Class<E> otherClass, final String propertyName,
             final String regex) {
         final ValueExtractor<E, String> extractor = ReflectionUtils.property(otherClass, propertyName);
         final Pattern pattern = Pattern.compile(regex);
 
-        return new EnhancedMatcher<E>() {
+        return new ParentMatcher<E>() {
             @Override
             public boolean match(E object) {
                 String value = extractor.get(object);
@@ -67,16 +67,16 @@ public class BeanMatchers {
             }
 
             public String toString() {
-                return otherClass.getSimpleName() + "." + propertyName + " =~ " + regex;
+                return otherClass.getSimpleName() + "." + propertyName + " =~ " + pattern.pattern();
             }
         };
     }
 
-    public static <O, V> EnhancedMatcher<O> in(final Class<O> otherClass, final String propertyName,
+    public static <O, V> XMatcher<O> in(final Class<O> otherClass, final String propertyName,
             final Set<V> values) {
         final ValueExtractor<O, V> extractor = ReflectionUtils.property(otherClass, propertyName);
 
-        return new EnhancedMatcher<O>() {
+        return new ParentMatcher<O>() {
             @Override
             public boolean match(O object) {
                 V value = extractor.get(object);

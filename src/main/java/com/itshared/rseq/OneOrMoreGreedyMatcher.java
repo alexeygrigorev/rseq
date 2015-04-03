@@ -25,7 +25,7 @@ class OneOrMoreGreedyMatcher<E> extends DelegatingMatcher<E> {
     }
 
     @Override
-    public EnhancedMatcher<E> captureAs(String name) {
+    public ParentMatcher<E> captureAs(String name) {
         return new CapturingGroupMatcher<E>(name, this);
     }
 

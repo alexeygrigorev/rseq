@@ -12,11 +12,10 @@ class OneOrMoreLazyMatcher<E> extends OneOrMoreGreedyMatcher<E> {
     }
 
     @Override
-    public void initialize(MatchingContext<E> context, int index) {
-        super.initialize(context, index);
+    void initialize(MatchingContext<E> context) {
         this.nextMatcher = null;
 
-        List<Matcher<E>> pattern = context.getPattern();
+        List<ParentMatcher<E>> pattern = context.getPattern();
         if (index + 1 < pattern.size()) {
             Matcher<E> nextMatcher = pattern.get(index + 1);
             this.nextMatcher = DelegatingMatcher.wrap(nextMatcher);
@@ -54,6 +53,10 @@ class OneOrMoreLazyMatcher<E> extends OneOrMoreGreedyMatcher<E> {
 
     @Override
     public String toString() {
+        if (nextMatcher == null) {
+            return super.toString();
+        }
+
         return "[" + delegateToString() + "]+?";
     }
 }

@@ -18,24 +18,24 @@ import org.junit.Test;
 public class WordMatcherTest {
 
     private static final String DEFINITION_POS_REGEX = "(NN[PS]{0,2}|NP\\+?|NN\\+|LNK)";
-    public static final EnhancedMatcher<Word> DEFINITION_MATCHER = posRegexp(DEFINITION_POS_REGEX);
+    public static final XMatcher<Word> DEFINITION_MATCHER = posRegexp(DEFINITION_POS_REGEX);
 
-    private static final EnhancedMatcher<Word> isOrAre = word("is").or(word("are"));
-    private static final EnhancedMatcher<Word> POS_DET = pos("DT");
+    private static final XMatcher<Word> isOrAre = word("is").or(word("are"));
+    private static final XMatcher<Word> POS_DET = pos("DT");
 
-    public static EnhancedMatcher<Word> definition() {
+    public static XMatcher<Word> definition() {
         return DEFINITION_MATCHER.captureAs("definition");
     }
 
-    public static EnhancedMatcher<Word> word(String token) {
+    public static XMatcher<Word> word(String token) {
         return BeanMatchers.eq(Word.class, "token", token);
     }
 
-    public static EnhancedMatcher<Word> pos(String posTag) {
+    public static XMatcher<Word> pos(String posTag) {
         return BeanMatchers.eq(Word.class, "pos", posTag);
     }
 
-    public static EnhancedMatcher<Word> posRegexp(String posRegex) {
+    public static XMatcher<Word> posRegexp(String posRegex) {
         return BeanMatchers.regex(Word.class, "pos", posRegex);
     }
 
@@ -165,9 +165,7 @@ public class WordMatcherTest {
     public void findPattern_oneOrMore_middle() {
         List<Word> sentence = sentence("p/LNK", ",/,", ",/,", ",/,", "reduced Planck constant/LNK");
 
-        Matcher<Word> comma = BeanMatchers.eq(Word.class, "token", ",").oneOrMoreGreedy();
-
-        Pattern<Word> pattern = Pattern.create(comma);
+        Pattern<Word> pattern = Pattern.create(word(",").oneOrMoreGreedy());
         List<Match<Word>> matches = pattern.find(sentence);
 
         assertEquals(1, matches.size());
@@ -179,30 +177,10 @@ public class WordMatcherTest {
     }
 
     @Test
-    public void findPattern_groupMatchers_capture() {
-        List<Word> sentence = sentence("ħ/NN", "is/VBZ", "the/DT", "``/``", "reduced/NN", "Planck/NN",
-                "constant/NN", "''/''", "./.");
-
-        EnhancedMatcher<Word> quote = BeanMatchers.eq(Word.class, "token", "``");
-        EnhancedMatcher<Word> noun = BeanMatchers.eq(Word.class, "pos", "NN");
-        EnhancedMatcher<Word> unquote = BeanMatchers.eq(Word.class, "token", "''");
-
-        Pattern<Word> pattern = Pattern.create(quote, noun.oneOrMore().captureAs("link"), unquote);
-        Match<Word> result = pattern.find(sentence).get(0);
-
-        List<Word> captured = result.getCapturedGroup("link");
-
-        List<Word> expected = sentence("reduced/NN", "Planck/NN", "constant/NN");
-        assertEquals(expected, captured);
-    }
-
-    @Test
     public void findPattern_oneOrMore_end() {
         List<Word> sentence = sentence("p/LNK", "reduced Planck constant/LNK", ",/,", ",/,", ",/,");
 
-        Matcher<Word> comma = BeanMatchers.eq(Word.class, "token", ",").oneOrMoreGreedy();
-
-        Pattern<Word> pattern = Pattern.create(comma);
+        Pattern<Word> pattern = Pattern.create(word(",").oneOrMoreGreedy());
         List<Match<Word>> matches = pattern.find(sentence);
 
         assertEquals(1, matches.size());
@@ -234,8 +212,8 @@ public class WordMatcherTest {
     @Test
     public void findPattern_optional_last() {
         List<Word> sentence = sentence("p/LNK");
-        EnhancedMatcher<Word> p = BeanMatchers.eq(Word.class, "token", "p");
-        EnhancedMatcher<Word> comma = BeanMatchers.eq(Word.class, "token", ",");
+        XMatcher<Word> p = BeanMatchers.eq(Word.class, "token", "p");
+        XMatcher<Word> comma = BeanMatchers.eq(Word.class, "token", ",");
 
         Pattern<Word> pattern = Pattern.create(p, comma.optional());
         List<Match<Word>> result = pattern.find(sentence);
@@ -248,8 +226,8 @@ public class WordMatcherTest {
     @Test
     public void findPattern_optional_severalLast() {
         List<Word> sentence = sentence("p/LNK");
-        EnhancedMatcher<Word> p = BeanMatchers.eq(Word.class, "token", "p");
-        EnhancedMatcher<Word> comma = BeanMatchers.eq(Word.class, "token", ",");
+        XMatcher<Word> p = BeanMatchers.eq(Word.class, "token", "p");
+        XMatcher<Word> comma = BeanMatchers.eq(Word.class, "token", ",");
 
         Pattern<Word> pattern = Pattern.create(p, p.optional(), comma.optional());
         List<Match<Word>> result = pattern.find(sentence);
@@ -265,8 +243,8 @@ public class WordMatcherTest {
                 "i/LNK", ",/,", ",/,", "w/LNK");
 
         Set<String> identifiers = new HashSet<String>(Arrays.asList("p", "w", "i"));
-        EnhancedMatcher<Word> identifier = BeanMatchers.in(Word.class, "token", identifiers);
-        EnhancedMatcher<Word> comma = BeanMatchers.eq(Word.class, "token", ",");
+        XMatcher<Word> identifier = BeanMatchers.in(Word.class, "token", identifiers);
+        XMatcher<Word> comma = word(",");
 
         Pattern<Word> pattern = Pattern.create(identifier.oneOrMoreGreedy(), comma.zeroOrMoreGreedy());
         List<Match<Word>> matches = pattern.find(sentence);
@@ -285,8 +263,8 @@ public class WordMatcherTest {
         List<Word> sentence = sentence("p/LNK", "w/LNK", ",/,", ",/,", ",/,", "token/POS", "p/LNK", "w/LNK",
                 "i/LNK", ",/,", ",/,", "w/LNK");
 
-        EnhancedMatcher<Word> any = Matchers.anything();
-        EnhancedMatcher<Word> comma = BeanMatchers.eq(Word.class, "token", ",");
+        XMatcher<Word> any = Matchers.anything();
+        XMatcher<Word> comma = word(",");
 
         Pattern<Word> pattern = Pattern.create(any.oneOrMore(), comma.zeroOrMore());
         List<Match<Word>> matches = pattern.find(sentence);
@@ -304,10 +282,7 @@ public class WordMatcherTest {
     public void findPattern_zeroOrMoreLazy_noMatchForFirstMatcher() {
         List<Word> sentence = sentence("w/LNK", ",/,", "i/LNK", ",/,", ",/,", "i/LNK");
 
-        EnhancedMatcher<Word> dot = BeanMatchers.eq(Word.class, "token", ".");
-        EnhancedMatcher<Word> comma = BeanMatchers.eq(Word.class, "token", ",");
-
-        Pattern<Word> pattern = Pattern.create(dot.zeroOrMore(), comma.zeroOrMore(), word("i"));
+        Pattern<Word> pattern = Pattern.create(word(".").zeroOrMore(), word(",").zeroOrMore(), word("i"));
         List<Match<Word>> matches = pattern.find(sentence);
 
         Map<String, Word> variables = Collections.emptyMap();
@@ -319,10 +294,57 @@ public class WordMatcherTest {
     }
 
     @Test
+    public void findPattern_wildcardGroupMatchers_capture() {
+        List<Word> sentence = sentence("ħ/NN", "is/VBZ", "the/DT", "``/``", "reduced/NN", "Planck/NN",
+                "constant/NN", "''/''", "./.");
+
+        Pattern<Word> pattern = Pattern.create(word("``"), pos("NN").oneOrMore().captureAs("link"),
+                word("''"));
+        Match<Word> result = pattern.find(sentence).get(0);
+
+        List<Word> captured = result.getCapturedGroup("link");
+
+        List<Word> expected = sentence("reduced/NN", "Planck/NN", "constant/NN");
+        assertEquals(expected, captured);
+    }
+
+    @Test
+    public void findPattern_groupMatchers() {
+        List<Word> sentence = sentence("ħ/NN", "is/VBZ", "the/DT", "reduced/NN", "Planck/NN", "constant/NN",
+                "./.", "./.");
+
+        XMatcher<Word> the = word("the");
+        XMatcher<Word> noun = pos("NN");
+        XMatcher<Word> dot = word(".");
+
+        Pattern<Word> pattern = Pattern.create(the, Matchers.group(noun, noun, noun), dot);
+        Match<Word> result = pattern.find(sentence).get(0);
+
+        List<Word> expected = sentence("the/DT", "reduced/NN", "Planck/NN", "constant/NN", "./.");
+        assertEquals(expected, result.getMatchedSubsequence());
+    }
+
+    @Test
+    public void findPattern_groupMatchers_capture() {
+        List<Word> sentence = sentence("ħ/NN", "is/VBZ", "the/DT", "reduced/NN", "Planck/NN", "constant/NN",
+                "./.", "./.");
+
+        XMatcher<Word> the = word("the");
+        XMatcher<Word> noun = pos("NN");
+        XMatcher<Word> dot = word(".");
+
+        Pattern<Word> pattern = Pattern.create(the, Matchers.group(noun, noun, noun).captureAs("noun"), dot);
+        Match<Word> result = pattern.find(sentence).get(0);
+
+        List<Word> expected = sentence("reduced/NN", "Planck/NN", "constant/NN");
+        assertEquals(expected, result.getCapturedGroup("noun"));
+    }
+
+    @Test
     public void replacePattern_oneComma_everything() {
         List<Word> sentence = sentence(",/,", ",/,", ",/,", ",/,");
 
-        EnhancedMatcher<Word> comma = BeanMatchers.eq(Word.class, "token", ",");
+        XMatcher<Word> comma = BeanMatchers.eq(Word.class, "token", ",");
         Pattern<Word> pattern = Pattern.create(comma.oneOrMore());
 
         List<Word> result = pattern.replaceMatched(sentence, new MatchTransformer<Word>() {
@@ -341,8 +363,8 @@ public class WordMatcherTest {
         List<Word> sentence = sentence("'/'", "a/POS", "b/POS", "'/'", "c/POS", "d/POS", "e/POS", "f/POS",
                 "'/'", "g/POS", "h/POS", "'/'");
 
-        EnhancedMatcher<Word> any = Matchers.anything();
-        EnhancedMatcher<Word> quote = Matchers.eq(w("'/'"));
+        XMatcher<Word> any = Matchers.anything();
+        XMatcher<Word> quote = Matchers.eq(w("'/'"));
         Pattern<Word> pattern = Pattern.create(quote, any.zeroOrMore(), quote);
 
         List<Word> result = pattern.replace(sentence, new Transformer<Word>() {
@@ -366,7 +388,7 @@ public class WordMatcherTest {
         List<Word> sentence = sentence(",/,", ",/,", ",/,", "w/LNK", ",/,", "token/POS", "p/LNK", ",/,",
                 ",/,", "w/LNK", "i/LNK", ",/,", ",/,", "w/LNK", ",/,", ",/,");
 
-        EnhancedMatcher<Word> comma = BeanMatchers.eq(Word.class, "token", ",");
+        XMatcher<Word> comma = BeanMatchers.eq(Word.class, "token", ",");
         Pattern<Word> pattern = Pattern.create(comma.oneOrMore());
 
         List<Match<Word>> matches = pattern.find(sentence);

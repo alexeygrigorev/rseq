@@ -1,5 +1,7 @@
 package com.itshared.rseq;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 
 public class Matchers {
@@ -7,11 +9,9 @@ public class Matchers {
     private Matchers() {
     }
 
-    private static final AnythingMatcher<Object> ANYTHING_MATCHER = new AnythingMatcher<Object>();
-
-    private static class AnythingMatcher<E> extends EnhancedMatcher<E> implements OptionalMatcherMarker {
+    private static final ParentMatcher<Object> ANYTHING_MATCHER = new ParentMatcher<Object>() {
         @Override
-        public boolean match(E object) {
+        public boolean match(Object object) {
             return true;
         }
 
@@ -19,16 +19,16 @@ public class Matchers {
         public String toString() {
             return ".";
         }
-    }
+    };
 
-    public static <E> EnhancedMatcher<E> anything() {
+    public static <E> XMatcher<E> anything() {
         @SuppressWarnings("unchecked")
-        AnythingMatcher<E> result = (AnythingMatcher<E>) ANYTHING_MATCHER;
+        ParentMatcher<E> result = (ParentMatcher<E>) ANYTHING_MATCHER;
         return result;
     }
 
-    public static <E> EnhancedMatcher<E> eq(final E other) {
-        return new EnhancedMatcher<E>() {
+    public static <E> XMatcher<E> eq(final E other) {
+        return new ParentMatcher<E>() {
             @Override
             public boolean match(E object) {
                 return Objects.equals(object, other);
@@ -41,8 +41,8 @@ public class Matchers {
         };
     }
 
-    public static <E> EnhancedMatcher<E> or(final Matcher<E> a, final Matcher<E> b) {
-        return new EnhancedMatcher<E>() {
+    public static <E> XMatcher<E> or(final Matcher<E> a, final Matcher<E> b) {
+        return new ParentMatcher<E>() {
             @Override
             public boolean match(E object) {
                 return a.match(object) || b.match(object);
@@ -55,8 +55,8 @@ public class Matchers {
         };
     }
 
-    public static <E> EnhancedMatcher<E> and(final Matcher<E> a, final Matcher<E> b) {
-        return new EnhancedMatcher<E>() {
+    public static <E> XMatcher<E> and(final Matcher<E> a, final Matcher<E> b) {
+        return new ParentMatcher<E>() {
             @Override
             public boolean match(E object) {
                 return a.match(object) && b.match(object);
@@ -69,8 +69,8 @@ public class Matchers {
         };
     }
 
-    public static <E> EnhancedMatcher<E> not(final Matcher<E> matcher) {
-        return new EnhancedMatcher<E>() {
+    public static <E> XMatcher<E> not(final Matcher<E> matcher) {
+        return new ParentMatcher<E>() {
             @Override
             public boolean match(E object) {
                 return !matcher.match(object);
@@ -83,8 +83,8 @@ public class Matchers {
         };
     }
 
-    public static <E> EnhancedMatcher<E> isNull() {
-        return new EnhancedMatcher<E>() {
+    public static <E> XMatcher<E> isNull() {
+        return new ParentMatcher<E>() {
             @Override
             public boolean match(E object) {
                 return object == null;
@@ -95,5 +95,11 @@ public class Matchers {
                 return "== null";
             };
         };
+    }
+
+    @SafeVarargs
+    public static <E> XMatcher<E> group(Matcher<E>... matchers) {
+        List<ParentMatcher<E>> list = ParentMatcher.wrapMatchers(Arrays.asList(matchers));
+        return new GroupMatcher<E>(list);
     }
 }

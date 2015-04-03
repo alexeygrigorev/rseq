@@ -1,6 +1,6 @@
 package com.itshared.rseq;
 
-class OptionalMatcher<E> extends DelegatingMatcher<E> implements OptionalMatcherMarker {
+class OptionalMatcher<E> extends DelegatingMatcher<E> {
 
     public OptionalMatcher(Matcher<E> matcher) {
         super(matcher);
@@ -16,8 +16,13 @@ class OptionalMatcher<E> extends DelegatingMatcher<E> implements OptionalMatcher
     }
 
     @Override
-    public EnhancedMatcher<E> captureAs(String name) {
+    public ParentMatcher<E> captureAs(String name) {
         throw new UnsupportedOperationException("Capturing optional matchers is not yet supported");
+    }
+
+    @Override
+    boolean isOptional() {
+        return true;
     }
 
     @Override
