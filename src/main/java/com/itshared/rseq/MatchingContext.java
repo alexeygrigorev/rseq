@@ -93,7 +93,7 @@ class MatchingContext<E> {
     }
 
     void nextMatcher() {
-        currentMatcherIndex = currentListIterator.nextIndex() - 1;
+        currentMatcherIndex = currentListIterator.nextIndex();
     }
 
 }

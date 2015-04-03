@@ -194,7 +194,6 @@ public class WordMatcherTest {
 
         List<Word> expected = sentence("reduced/NN", "Planck/NN", "constant/NN");
         assertEquals(expected, captured);
-
     }
 
     @Test
