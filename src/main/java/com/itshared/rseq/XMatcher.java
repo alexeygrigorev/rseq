@@ -5,7 +5,7 @@ public abstract class XMatcher<E> implements Matcher<E> {
     public abstract boolean match(E object);
 
     public XMatcher<E> captureAs(String name) {
-        return new CapturingMatcher<E>(name, this);
+        return Matchers.capture(this, name);
     }
 
     public XMatcher<E> or(Matcher<E> other) {
@@ -13,23 +13,27 @@ public abstract class XMatcher<E> implements Matcher<E> {
     }
 
     public XMatcher<E> optional() {
-        return new OptionalMatcher<E>(this);
+        return Matchers.optional(this);
     }
 
     public XMatcher<E> oneOrMoreGreedy() {
-        return new OneOrMoreGreedyMatcher<E>(this);
+        return Matchers.oneOrMoreGreedy(this);
     }
 
     public XMatcher<E> zeroOrMoreGreedy() {
-        return new ZeroOrMoreGreedyMatcher<E>(this);
+        return Matchers.zeroOrMoreGreedy(this);
     }
 
     public XMatcher<E> oneOrMore() {
-        return new OneOrMoreLazyMatcher<E>(this);
+        return Matchers.oneOrMore(this);
     }
 
     public XMatcher<E> zeroOrMore() {
-        return new ZeroOrMoreLazyMatcher<E>(this);
+        return Matchers.zeroOrMore(this);
+    }
+
+    public XMatcher<E> invert() {
+        return Matchers.not(this);
     }
 
     @Override

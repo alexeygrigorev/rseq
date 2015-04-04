@@ -44,16 +44,7 @@ abstract class DelegatingMatcher<E> extends ParentMatcher<E> {
             ((ParentMatcher<E>) delegate).setContext(context);
         }
     }
-/*
-    @Override
-    void register(MatchingContext<E> context) {
-        if (delegate instanceof CMatcher) {
-            ((CMatcher<E>) delegate).register(context);
-        } else {
-            super.register(context);
-        }
-    }
-*/
+
     @Override
     void initialize(MatchingContext<E> context) {
         if (delegate instanceof ParentMatcher) {

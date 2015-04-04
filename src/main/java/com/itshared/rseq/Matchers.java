@@ -78,7 +78,7 @@ public class Matchers {
 
             @Override
             public String toString() {
-                return "not (" + matcher.toString() + ")";
+                return "not [" + matcher.toString() + "]";
             }
         };
     }
@@ -102,4 +102,29 @@ public class Matchers {
         List<ParentMatcher<E>> list = ParentMatcher.wrapMatchers(Arrays.asList(matchers));
         return new GroupMatcher<E>(list);
     }
+
+    public static <E> XMatcher<E> capture(Matcher<E> matcher, String name) {
+        return new CapturingMatcher<E>(name, matcher);
+    }
+
+    public static <E> XMatcher<E> optional(Matcher<E> matcher) {
+        return new OptionalMatcher<E>(matcher);
+    }
+
+    public static <E> XMatcher<E> oneOrMoreGreedy(Matcher<E> matcher) {
+        return new OneOrMoreGreedyMatcher<E>(matcher);
+    }
+
+    public static <E> XMatcher<E> zeroOrMoreGreedy(Matcher<E> matcher) {
+        return new ZeroOrMoreGreedyMatcher<E>(matcher);
+    }
+
+    public static <E> XMatcher<E> oneOrMore(Matcher<E> matcher) {
+        return new OneOrMoreLazyMatcher<E>(matcher);
+    }
+
+    public static <E> XMatcher<E> zeroOrMore(Matcher<E> matcher) {
+        return new ZeroOrMoreLazyMatcher<E>(matcher);
+    }
+
 }

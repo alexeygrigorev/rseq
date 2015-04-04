@@ -7,13 +7,14 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 
+import org.apache.commons.lang3.Validate;
+
 class MatchingContext<E> {
 
     private final Map<String, E> variables = new HashMap<String, E>();
     private final Map<String, List<E>> groups = new HashMap<String, List<E>>();
     private final List<Match<E>> results = new ArrayList<Match<E>>();
 
-    private final List<ParentMatcher<E>> pattern;
     private final List<ParentMatcher<E>> flatPattern = new ArrayList<>();
     private final List<E> sequence;
 
@@ -21,22 +22,25 @@ class MatchingContext<E> {
     private int currentMatcherIndex = 0;
     private ListIterator<E> currentListIterator;
 
-    public MatchingContext(List<ParentMatcher<E>> pattern, List<E> sequence) {
-        this.pattern = pattern;
+    public MatchingContext(List<E> sequence) {
         this.sequence = sequence;
     }
 
     public void addSuccessfulMatch() {
-        if (currentListIterator == null) {
-            throw new IllegalStateException("currentListIterator must be initialized already");
-        }
+        Validate.validState(currentListIterator != null, "currentListIterator must be initialized already");
 
         int nextIndex = currentListIterator.nextIndex();
+        if (nextIndex == index) {
+            // empty match, Optional or ZeroOrMore matcher, ignoring it
+            return;
+        }
+
         List<E> matchedSubsequence = new ArrayList<E>(sequence.subList(index, nextIndex));
         Map<String, E> variablesCopy = new HashMap<>(variables);
         Map<String, List<E>> groupsCopy = new HashMap<>(groups);
         Match<E> match = new Match<E>(index, matchedSubsequence, variablesCopy, groupsCopy);
         results.add(match);
+
         variables.clear();
         groups.clear();
         index = nextIndex - 1;
@@ -55,7 +59,7 @@ class MatchingContext<E> {
     }
 
     public List<ParentMatcher<E>> getPattern() {
-        return pattern;
+        return flatPattern;
     }
 
     public Iterator<Void> findIterator() {

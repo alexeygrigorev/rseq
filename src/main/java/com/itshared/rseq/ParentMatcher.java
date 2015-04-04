@@ -36,7 +36,6 @@ abstract class ParentMatcher<E> extends XMatcher<E> {
      * Marker interface for marking matchers that can accept no input. It's
      * needed when we run into the end of sequence and need to check if all the
      * remaining matchers are optional or not.
-     * 
      */
     boolean isOptional() {
         return false;
@@ -49,7 +48,6 @@ abstract class ParentMatcher<E> extends XMatcher<E> {
             return DelegatingMatcher.wrap(matcher);
         }
     }
-
 
     static <E> List<ParentMatcher<E>> wrapMatchers(List<Matcher<E>> matchers) {
         List<ParentMatcher<E>> list = new ArrayList<ParentMatcher<E>>(matchers.size());

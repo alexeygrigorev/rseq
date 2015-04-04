@@ -10,18 +10,19 @@ class OneOrMoreGreedyMatcher<E> extends DelegatingMatcher<E> {
 
     @Override
     public boolean match(E object) {
-        if (delegateMatch(object)) {
-            ListIterator<E> currentIterator = context().getCurrentMatchIterator();
-            while (currentIterator.hasNext()) {
-                E next = currentIterator.next();
-                if (!delegateMatch(next)) {
-                    currentIterator.previous();
-                    break;
-                }
-            }
-            return true;
+        if (!delegateMatch(object)) {
+            return false;
         }
-        return false;
+
+        ListIterator<E> currentIterator = context().getCurrentMatchIterator();
+        while (currentIterator.hasNext()) {
+            E next = currentIterator.next();
+            if (!delegateMatch(next)) {
+                currentIterator.previous();
+                break;
+            }
+        }
+        return true;
     }
 
     @Override

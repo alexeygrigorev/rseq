@@ -6,6 +6,8 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.commons.lang3.Validate;
+
 /**
  * This class represents a pattern to be found in a sequence. The pattern is
  * composed of {@link Matcher}s, each of which is able to match one or more
@@ -43,7 +45,7 @@ public class Pattern<E> {
      * @return list of found matches
      */
     public List<Match<E>> find(List<E> sequence) {
-        MatchingContext<E> context = new MatchingContext<E>(matchers, sequence);
+        MatchingContext<E> context = new MatchingContext<E>(sequence);
         initialize(context);
 
         // TODO: no need for iterator
@@ -111,7 +113,7 @@ public class Pattern<E> {
         return replaceMatched(sequence, new MatchTransformer<E>() {
             @Override
             public List<E> transform(Match<E> match) {
-                E result = transformer.transform(match.getMatchedSubsequence());
+                E result = transformer.transform(match);
                 return Collections.singletonList(result);
             }
         });
@@ -155,10 +157,10 @@ public class Pattern<E> {
         while (iterator.hasNext()) {
             Match<E> match = iterator.next();
 
-            notMatchedTo = match.getMatchFromIndex();
+            notMatchedTo = match.matchedFrom();
             result.addAll(sequence.subList(notMatchedFrom, notMatchedTo));
             result.addAll(transformer.transform(match));
-            notMatchedFrom = match.getMatchToIndex();
+            notMatchedFrom = match.matchedTo();
         }
 
         result.addAll(sequence.subList(notMatchedFrom, sequence.size()));
@@ -182,6 +184,7 @@ public class Pattern<E> {
      * Creates a pattern from supplied matchers
      */
     public static <E> Pattern<E> create(List<Matcher<E>> matchers) {
+        Validate.notEmpty(matchers, "Pattern must not be empty");
         return new Pattern<E>(ParentMatcher.wrapMatchers(matchers));
     }
 

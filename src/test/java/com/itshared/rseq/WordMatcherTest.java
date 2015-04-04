@@ -39,6 +39,11 @@ public class WordMatcherTest {
         return BeanMatchers.regex(Word.class, "pos", posRegex);
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void pattern_empty_throwsException() {
+        Pattern.create();
+    }
+
     @Test
     public void findPattern_first() {
         List<Word> sentence = sentence("p/LNK", "is/VBZ", "the/DT", "wave function/LNK", ",/,", "i/FW",
@@ -192,6 +197,46 @@ public class WordMatcherTest {
     }
 
     @Test
+    public void findPattern_oneOrMore_noMatch() {
+        List<Word> sentence = sentence("p/LNK", "reduced Planck constant/LNK");
+
+        Pattern<Word> pattern = Pattern.create(word(",").oneOrMore(), word(","));
+        List<Match<Word>> matches = pattern.find(sentence);
+
+        assertTrue(matches.isEmpty());
+    }
+
+    @Test
+    public void findPattern_oneOrMoreGreedy_noMatch() {
+        List<Word> sentence = sentence("p/LNK", "reduced Planck constant/LNK");
+
+        Pattern<Word> pattern = Pattern.create(word(",").oneOrMoreGreedy());
+        List<Match<Word>> matches = pattern.find(sentence);
+
+        assertTrue(matches.isEmpty());
+    }
+
+    @Test
+    public void findPattern_zeroOrMore_noMatch() {
+        List<Word> sentence = sentence("p/LNK", "reduced Planck constant/LNK");
+
+        Pattern<Word> pattern = Pattern.create(word(".").zeroOrMore(), word(","));
+        List<Match<Word>> matches = pattern.find(sentence);
+
+        assertTrue(matches.isEmpty());
+    }
+
+    @Test
+    public void findPattern_zeroOrMoreGreedy_noMatch() {
+        List<Word> sentence = sentence("p/LNK", "reduced Planck constant/LNK");
+
+        Pattern<Word> pattern = Pattern.create(word(".").zeroOrMoreGreedy(), word(","));
+        List<Match<Word>> matches = pattern.find(sentence);
+
+        assertTrue(matches.isEmpty());
+    }
+
+    @Test
     public void findPattern_oneOrMore_twoMatches() {
         List<Word> sentence = sentence("p/LNK", "w/LNK", ",/,", ",/,", ",/,", "p/LNK", "w/LNK", ",/,", ",/,",
                 "w/LNK");
@@ -279,6 +324,34 @@ public class WordMatcherTest {
     }
 
     @Test
+    public void findPattern_zeroOrMoreGreedy_noMatchForZeroOrMore() {
+        List<Word> sentence = sentence("w/LNK", ",/,", "i/LNK", ",/,", ",/,", "i/LNK");
+        Pattern<Word> pattern = Pattern.create(word(".").zeroOrMoreGreedy(), word(",").oneOrMore());
+        List<Match<Word>> matches = pattern.find(sentence);
+
+        Map<String, Word> variables = Collections.emptyMap();
+        Match<Word> match1 = new Match<Word>(1, sentence.subList(1, 1 + 1), variables);
+        Match<Word> match2 = new Match<Word>(3, sentence.subList(3, 3 + 2), variables);
+        List<Match<Word>> expectedMatches = Arrays.asList(match1, match2);
+
+        assertEquals(expectedMatches, matches);
+    }
+
+    @Test
+    public void findPattern_allZeroOrMoreGreedy() {
+        List<Word> sentence = sentence("w/LNK", ",/,", "i/LNK", ",/,", ",/,", "i/LNK");
+        Pattern<Word> pattern = Pattern.create(word(".").zeroOrMoreGreedy(), word(",").zeroOrMore());
+        List<Match<Word>> matches = pattern.find(sentence);
+
+        Map<String, Word> variables = Collections.emptyMap();
+        Match<Word> match1 = new Match<Word>(1, sentence.subList(1, 1 + 1), variables);
+        Match<Word> match2 = new Match<Word>(3, sentence.subList(3, 3 + 2), variables);
+        List<Match<Word>> expectedMatches = Arrays.asList(match1, match2);
+
+        assertEquals(expectedMatches, matches);
+    }
+
+    @Test
     public void findPattern_zeroOrMoreLazy_noMatchForFirstMatcher() {
         List<Word> sentence = sentence("w/LNK", ",/,", "i/LNK", ",/,", ",/,", "i/LNK");
 
@@ -309,6 +382,37 @@ public class WordMatcherTest {
     }
 
     @Test
+    public void findPattern_zeroOrMore_capture() {
+        List<Word> sentence = sentence("ħ/NN", "is/VBZ", "the/DT", "``/``", "reduced/NN", "Planck/NN",
+                "constant/NN", "''/''", "./.");
+
+        Pattern<Word> pattern = Pattern.create(word("``"), pos("NN").zeroOrMore().captureAs("link"),
+                word("''"));
+        Match<Word> result = pattern.find(sentence).get(0);
+
+        List<Word> captured = result.getCapturedGroup("link");
+
+        List<Word> expected = sentence("reduced/NN", "Planck/NN", "constant/NN");
+        assertEquals(expected, captured);
+    }
+
+    @Test
+    public void findPattern_zeroOrMore_emptyCapture() {
+        List<Word> sentence = sentence("ħ/NN", "is/VBZ", "the/DT", "``/``", "''/''", "./.");
+
+        Pattern<Word> pattern = Pattern.create(word("``"), pos("NN").zeroOrMore().captureAs("link"),
+                word("''"));
+
+        List<Match<Word>> result = pattern.find(sentence);
+        assertEquals(1, result.size());
+
+        Match<Word> match = result.get(0);
+        List<Word> captured = match.getCapturedGroup("link");
+        assertTrue(captured.isEmpty());
+    }
+
+    
+    @Test
     public void findPattern_groupMatchers() {
         List<Word> sentence = sentence("ħ/NN", "is/VBZ", "the/DT", "reduced/NN", "Planck/NN", "constant/NN",
                 "./.", "./.");
@@ -322,6 +426,35 @@ public class WordMatcherTest {
 
         List<Word> expected = sentence("the/DT", "reduced/NN", "Planck/NN", "constant/NN", "./.");
         assertEquals(expected, result.getMatchedSubsequence());
+    }
+
+    @Test
+    public void findPattern_groupMatchers_noMatch() {
+        List<Word> sentence = sentence("ħ/NN", "is/VBZ", "the/DT", "reduced/NN", "Planck/NN", "constant/NN",
+                "./.", "./.");
+
+        XMatcher<Word> the = word("the");
+        XMatcher<Word> adj = pos("JJ");
+        XMatcher<Word> dot = word(".");
+
+        Pattern<Word> pattern = Pattern.create(the, Matchers.group(adj, adj, adj), dot);
+        List<Match<Word>> result = pattern.find(sentence);
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    public void findPattern_groupMatchers_noMatch2() {
+        List<Word> sentence = sentence("ħ/NN", "is/VBZ", "the/DT", "reduced/NN", "Planck/NN", "constant/NN",
+                "./.", "./.");
+
+        XMatcher<Word> the = word("the");
+        XMatcher<Word> noun = pos("NN");
+        XMatcher<Word> adj = pos("JJ");
+        XMatcher<Word> dot = word(".");
+
+        Pattern<Word> pattern = Pattern.create(the, Matchers.group(noun, noun, adj), dot);
+        List<Match<Word>> result = pattern.find(sentence);
+        assertTrue(result.isEmpty());
     }
 
     @Test
@@ -340,6 +473,158 @@ public class WordMatcherTest {
         assertEquals(expected, result.getCapturedGroup("noun"));
     }
 
+    @Test
+    public void findPattern_groupMatcher_lazyMatchGroup() {
+        List<Word> sentence = sentence("ħ/NN", "is/VBZ", "the/DT", "reduced/NN", "Planck/NN", "constant/NN",
+                "./.", "./.");
+
+        XMatcher<Word> the = word("the");
+        XMatcher<Word> any = Matchers.anything();
+        XMatcher<Word> dot = word(".");
+
+        Pattern<Word> pattern = Pattern.create(the, Matchers.group(any.oneOrMore()).captureAs("noun"), dot);
+        Match<Word> result = pattern.find(sentence).get(0);
+
+        List<Word> expected = sentence("reduced/NN", "Planck/NN", "constant/NN");
+        assertEquals(expected, result.getCapturedGroup("noun"));
+    }
+
+    @Test
+    public void findPattern_groupMatcher_lazyMatchGroupLast() {
+        List<Word> sentence = sentence("ħ/NN", "is/VBZ", "the/DT", "Planck/NN", "constant/NN", "./.", "./.");
+
+        XMatcher<Word> is = word("is");
+        XMatcher<Word> the = word("the");
+        XMatcher<Word> any = Matchers.anything();
+        XMatcher<Word> dot = word(".");
+
+        Pattern<Word> pattern = Pattern.create(is,
+                Matchers.group(the.optional(), any.oneOrMore()).captureAs("noun"), dot);
+        Match<Word> result = pattern.find(sentence).get(0);
+
+        List<Word> expected = sentence("the/DT", "Planck/NN", "constant/NN");
+        assertEquals(expected, result.getCapturedGroup("noun"));
+    }
+
+    @Test
+    public void findPattern_groupMatcher_lazyMatchGroupLast_optional() {
+        List<Word> sentence = sentence("ħ/NN", "is/VBZ", "Planck/NN", "constant/NN", "./.", "./.");
+
+        XMatcher<Word> is = word("is");
+        XMatcher<Word> the = word("the");
+        XMatcher<Word> any = Matchers.anything();
+        XMatcher<Word> dot = word(".");
+
+        Pattern<Word> pattern = Pattern.create(is,
+                Matchers.group(the.optional(), any.oneOrMore()).captureAs("noun"), dot);
+        Match<Word> result = pattern.find(sentence).get(0);
+
+        List<Word> expected = sentence("Planck/NN", "constant/NN");
+        assertEquals(expected, result.getCapturedGroup("noun"));
+    }
+
+    @Test
+    public void findPattern_groupMatcher_lastOptional_match() {
+        List<Word> sentence = sentence("ħ/NN", "is/VBZ", "the/DT", "Planck/NN", "constant/NN");
+
+        XMatcher<Word> the = word("the");
+        XMatcher<Word> noun = pos("NN");
+        XMatcher<Word> dot = word(".");
+
+        Pattern<Word> pattern = Pattern.create(the, Matchers.group(noun, noun, dot.optional()));
+        Match<Word> result = pattern.find(sentence).get(0);
+
+        List<Word> expected = sentence("the/DT", "Planck/NN", "constant/NN");
+        assertEquals(expected, result.getMatchedSubsequence());
+    }
+
+    @Test
+    public void findPattern_groupMatcher_lastNotMatch() {
+        List<Word> sentence = sentence("ħ/NN", "is/VBZ", "the/DT", "Planck/NN", "constant/NN");
+
+        XMatcher<Word> the = word("the");
+        XMatcher<Word> noun = pos("NN");
+        XMatcher<Word> dot = word(".");
+
+        Pattern<Word> pattern = Pattern.create(the, Matchers.group(noun, noun, dot));
+        List<Match<Word>> result = pattern.find(sentence);
+
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    public void findPattern_groupCapturer_noMatch() {
+        List<Word> sentence = sentence("ħ/NN", "is/VBZ", "the/DT", "Planck/NN", "constant/NN");
+
+        XMatcher<Word> the = word("the");
+        XMatcher<Word> noun = pos("NN");
+        XMatcher<Word> dot = word(".");
+
+        Pattern<Word> pattern = Pattern.create(the, Matchers.group(noun, noun, dot).captureAs("name"));
+        List<Match<Word>> result = pattern.find(sentence);
+
+        assertTrue(result.isEmpty());
+    }
+
+
+    @Test
+    public void findPattern_customMatcher_optional() {
+        List<Word> sentence = sentence("is/VBZ", "these/DT", "Planck/NN", "constant/NN");
+        XMatcher<Word> withS = new XMatcher<Word>() {
+            @Override
+            public boolean match(Word object) {
+                return object.getToken().contains("s");
+            }
+        };
+
+        Pattern<Word> pattern = Pattern.create(withS, withS.optional());
+        List<Match<Word>> matches = pattern.find(sentence);
+
+        Map<String, Word> variables = Collections.emptyMap();
+        Match<Word> match1 = new Match<Word>(0, sentence.subList(0, 0 + 2), variables);
+        Match<Word> match2 = new Match<Word>(3, sentence.subList(3, 3 + 1), variables);
+        List<Match<Word>> expectedMatches = Arrays.asList(match1, match2);
+
+        assertEquals(expectedMatches, matches);
+    }
+
+    
+    @Test
+    public void findPattern_customMatcher_oneOrMore() {
+        List<Word> sentence = sentence("is/VBZ", "these/DT", "Planck/NN", "constant/NN");
+        XMatcher<Word> withS = new XMatcher<Word>() {
+            @Override
+            public boolean match(Word object) {
+                return object.getToken().contains("s");
+            }
+        };
+
+        Pattern<Word> pattern = Pattern.create(withS.oneOrMore());
+        List<Match<Word>> matches = pattern.find(sentence);
+
+        Map<String, Word> variables = Collections.emptyMap();
+        Match<Word> match1 = new Match<Word>(0, sentence.subList(0, 0 + 2), variables);
+        Match<Word> match2 = new Match<Word>(3, sentence.subList(3, 3 + 1), variables);
+        List<Match<Word>> expectedMatches = Arrays.asList(match1, match2);
+
+        assertEquals(expectedMatches, matches);
+    }
+
+    @Test
+    public void findPattern_customMatcher_MatcherIntergace() {
+        List<Word> sentence = sentence("is/VBZ", "these/DT", "Planck/NN", "constant/NN");
+        Matcher<Word> withS = new Matcher<Word>() {
+            @Override
+            public boolean match(Word object) {
+                return object.getToken().contains("s");
+            }
+        };
+
+        Pattern<Word> pattern = Pattern.create(withS);
+        List<Match<Word>> matches = pattern.find(sentence);
+        assertEquals(3, matches.size());
+    }
+    
     @Test
     public void replacePattern_oneComma_everything() {
         List<Word> sentence = sentence(",/,", ",/,", ",/,", ",/,");
@@ -369,9 +654,9 @@ public class WordMatcherTest {
 
         List<Word> result = pattern.replace(sentence, new Transformer<Word>() {
             @Override
-            public Word transform(List<Word> match) {
+            public Word transform(Match<Word> match) {
                 List<String> toJoin = new ArrayList<String>();
-                for (Word word : match) {
+                for (Word word : match.getMatchedSubsequence()) {
                     toJoin.add(word.getToken());
                 }
                 String joined = StringUtils.join(toJoin.subList(1, toJoin.size() - 1), " ");

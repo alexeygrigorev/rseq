@@ -25,11 +25,11 @@ public class Match<E> {
         this.groups = groups;
     }
 
-    public int getMatchFromIndex() {
+    public int matchedFrom() {
         return index;
     }
 
-    public int getMatchToIndex() {
+    public int matchedTo() {
         return index + match.size();
     }
 
@@ -38,7 +38,7 @@ public class Match<E> {
     }
 
     public Map<String, E> getVariables() {
-        return variables;
+        return Collections.unmodifiableMap(variables);
     }
 
     public E getVariable(String name) {
@@ -47,6 +47,10 @@ public class Match<E> {
 
     public List<E> getCapturedGroup(String name) {
         return groups.get(name);
+    }
+
+    public Map<String, List<E>> getCapturedGroups() {
+        return Collections.unmodifiableMap(groups);
     }
 
     @Override

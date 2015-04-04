@@ -43,6 +43,35 @@ class GroupMatcher<E> extends ParentMatcher<E> {
     }
 
     @Override
+    void setContext(MatchingContext<E> context) {
+        super.setContext(context);
+        for (ParentMatcher<E> matcher : matchers) {
+            matcher.setContext(context);
+        }
+    }
+
+    @Override
+    int register(MatchingContext<E> context) {
+        Iterator<ParentMatcher<E>> it = matchers.iterator();
+
+        int index = it.next().register(context);
+        this.index = index;
+
+        while (it.hasNext()) {
+            it.next().register(context);
+        }
+
+        return index;
+    }
+
+    @Override
+    void initialize(MatchingContext<E> context) {
+        for (ParentMatcher<E> matcher : matchers) {
+            matcher.initialize(context);
+        }
+    }
+
+    @Override
     public XMatcher<E> captureAs(String name) {
         return new CapturingGroupMatcher<>(name, this);
     }
