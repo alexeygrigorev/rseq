@@ -1,20 +1,21 @@
-package com.itshared.rseq;
+package com.alexeygrigorev.rseq;
 
 import java.util.ListIterator;
 
-class OneOrMoreGreedyMatcher<E> extends DelegatingMatcher<E> {
+class ZeroOrMoreGreedyMatcher<E> extends DelegatingMatcher<E> {
 
-    public OneOrMoreGreedyMatcher(Matcher<E> matcher) {
+    public ZeroOrMoreGreedyMatcher(Matcher<E> matcher) {
         super(matcher);
     }
 
     @Override
     public boolean match(E object) {
+        ListIterator<E> currentIterator = context().getCurrentMatchIterator();
         if (!delegateMatch(object)) {
-            return false;
+            currentIterator.previous();
+            return true;
         }
 
-        ListIterator<E> currentIterator = context().getCurrentMatchIterator();
         while (currentIterator.hasNext()) {
             E next = currentIterator.next();
             if (!delegateMatch(next)) {
@@ -22,6 +23,7 @@ class OneOrMoreGreedyMatcher<E> extends DelegatingMatcher<E> {
                 break;
             }
         }
+
         return true;
     }
 
@@ -31,7 +33,13 @@ class OneOrMoreGreedyMatcher<E> extends DelegatingMatcher<E> {
     }
 
     @Override
-    public String toString() {
-        return "[" + delegateToString() + "]+";
+    boolean isOptional() {
+        return true;
     }
+
+    @Override
+    public String toString() {
+        return "[" + delegateToString() + "]*";
+    }
+
 }

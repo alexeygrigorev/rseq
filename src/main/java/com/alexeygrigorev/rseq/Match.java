@@ -1,4 +1,4 @@
-package com.itshared.rseq;
+package com.alexeygrigorev.rseq;
 
 import java.util.Collections;
 import java.util.List;
@@ -7,6 +7,11 @@ import java.util.Map;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
+/**
+ * A successful match produced by matching a {@link Pattern} against some
+ * (sub)sequence of objects.
+ * 
+ */
 public class Match<E> {
 
     private final int index;
@@ -14,10 +19,25 @@ public class Match<E> {
     private final Map<String, E> variables;
     private final Map<String, List<E>> groups;
 
+    /**
+     * Shouldn't be used by users of the library
+     * 
+     * @param index
+     * @param match
+     * @param variables
+     */
     public Match(int index, List<E> match, Map<String, E> variables) {
         this(index, match, variables, Collections.<String, List<E>> emptyMap());
     }
 
+    /**
+     * Shouldn't be used by users of the library
+     * 
+     * @param index
+     * @param match
+     * @param variables
+     * @param groups
+     */
     public Match(int index, List<E> match, Map<String, E> variables, Map<String, List<E>> groups) {
         this.index = index;
         this.match = match;
@@ -25,10 +45,17 @@ public class Match<E> {
         this.groups = groups;
     }
 
+    /**
+     * @return the starting position of matched sequence
+     */
     public int matchedFrom() {
         return index;
     }
 
+    /**
+     * @return the end position of matching sequence. it points to the next
+     *         element in the sequence after the match
+     */
     public int matchedTo() {
         return index + match.size();
     }

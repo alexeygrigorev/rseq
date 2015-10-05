@@ -1,4 +1,4 @@
-package com.itshared.rseq;
+package com.alexeygrigorev.rseq;
 
 class OptionalMatcher<E> extends DelegatingMatcher<E> {
 

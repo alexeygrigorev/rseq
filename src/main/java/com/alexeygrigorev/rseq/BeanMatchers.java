@@ -1,10 +1,10 @@
-package com.itshared.rseq;
+package com.alexeygrigorev.rseq;
 
 import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import com.itshared.rseq.ReflectionUtils.ValueExtractor;
+import com.alexeygrigorev.rseq.ReflectionUtils.ValueExtractor;
 
 /**
  * Utility class with convenience methods for creating matchers that work on

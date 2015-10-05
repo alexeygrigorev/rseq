@@ -1,4 +1,4 @@
-package com.itshared.rseq;
+package com.alexeygrigorev.rseq;
 
 import static org.junit.Assert.*;
 
@@ -7,6 +7,9 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.junit.Test;
+
+import com.alexeygrigorev.rseq.BeanMatchers;
+import com.alexeygrigorev.rseq.XMatcher;
 
 public class BeanMatchersTest {
 

@@ -1,4 +1,4 @@
-package com.itshared.rseq;
+package com.alexeygrigorev.rseq;
 
 import java.util.List;
 

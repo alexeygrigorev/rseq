@@ -1,13 +1,13 @@
-package com.itshared.rseq;
+package com.alexeygrigorev.rseq;
 
 import java.util.List;
 import java.util.ListIterator;
 
-class ZeroOrMoreLazyMatcher<E> extends ZeroOrMoreGreedyMatcher<E> {
+class OneOrMoreLazyMatcher<E> extends OneOrMoreGreedyMatcher<E> {
 
     private DelegatingMatcher<E> nextMatcher;
 
-    public ZeroOrMoreLazyMatcher(Matcher<E> matcher) {
+    public OneOrMoreLazyMatcher(Matcher<E> matcher) {
         super(matcher);
     }
 
@@ -28,16 +28,13 @@ class ZeroOrMoreLazyMatcher<E> extends ZeroOrMoreGreedyMatcher<E> {
             return super.match(object);
         }
 
-        ListIterator<E> currentIterator = context().getCurrentMatchIterator();
-
         if (!delegateMatch(object)) {
-            currentIterator.previous();
-            return true;
+            return false;
         }
 
+        ListIterator<E> currentIterator = context().getCurrentMatchIterator();
         while (currentIterator.hasNext()) {
             E next = currentIterator.next();
-
             boolean currentMatch = delegateMatch(next);
             boolean nextMatch = nextMatcher.unwrappingMatch(next);
 
@@ -51,7 +48,6 @@ class ZeroOrMoreLazyMatcher<E> extends ZeroOrMoreGreedyMatcher<E> {
                 break;
             }
         }
-
         return true;
     }
 
@@ -61,7 +57,6 @@ class ZeroOrMoreLazyMatcher<E> extends ZeroOrMoreGreedyMatcher<E> {
             return super.toString();
         }
 
-        return "[" + delegateToString() + "]*?";
+        return "[" + delegateToString() + "]+?";
     }
-
 }

@@ -1,4 +1,4 @@
-package com.itshared.rseq;
+package com.alexeygrigorev.rseq;
 
 class CapturingMatcher<E> extends DelegatingMatcher<E> {
 

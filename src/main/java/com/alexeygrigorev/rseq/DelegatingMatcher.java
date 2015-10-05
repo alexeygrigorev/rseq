@@ -1,4 +1,4 @@
-package com.itshared.rseq;
+package com.alexeygrigorev.rseq;
 
 abstract class DelegatingMatcher<E> extends ParentMatcher<E> {
 

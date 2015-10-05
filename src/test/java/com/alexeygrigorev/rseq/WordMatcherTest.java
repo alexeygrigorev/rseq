@@ -1,4 +1,4 @@
-package com.itshared.rseq;
+package com.alexeygrigorev.rseq;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -14,6 +14,15 @@ import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Test;
+
+import com.alexeygrigorev.rseq.BeanMatchers;
+import com.alexeygrigorev.rseq.Match;
+import com.alexeygrigorev.rseq.MatchTransformer;
+import com.alexeygrigorev.rseq.Matcher;
+import com.alexeygrigorev.rseq.Matchers;
+import com.alexeygrigorev.rseq.Pattern;
+import com.alexeygrigorev.rseq.Transformer;
+import com.alexeygrigorev.rseq.XMatcher;
 
 public class WordMatcherTest {
 

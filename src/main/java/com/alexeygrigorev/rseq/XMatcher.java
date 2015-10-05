@@ -1,5 +1,9 @@
-package com.itshared.rseq;
+package com.alexeygrigorev.rseq;
 
+/**
+ * A class that implements {@link Matcher} and adds some extra methods for
+ * convenience (like {@link #or(Matcher)} or {@link #optional()})
+ */
 public abstract class XMatcher<E> implements Matcher<E> {
 
     public abstract boolean match(E object);
