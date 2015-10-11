@@ -52,8 +52,7 @@ public class CaseForWikiTest {
         List<String> words = Arrays.asList("Where E is the energy and λ is the wavelength".split(" "));
 
         List<String> ids = Arrays.asList("E", "λ", "p", "m", "c");
-        Pattern<String> pattern = Pattern.create(in(ids), eq("is"), eq("the"),
-                in("energy", "wavelength"));
+        Pattern<String> pattern = Pattern.create(in(ids), eq("is"), eq("the"), in("energy", "wavelength"));
         List<Match<String>> matches = pattern.find(words);
         assertEquals(2, matches.size());
 
@@ -100,8 +99,8 @@ public class CaseForWikiTest {
         List<String> words = Arrays.asList("Where E is the energy and λ is wavelength".split(" "));
 
         XMatcher<String> anything = anything();
-        Pattern<String> pattern = Pattern.create(oneLetterRegexp.captureAs("ID"), eq("is"), eq("the").optional(),
-                anything.captureAs("DEF"));
+        Pattern<String> pattern = Pattern.create(oneLetterRegexp.captureAs("ID"), eq("is"), eq("the")
+                .optional(), anything.captureAs("DEF"));
         List<Match<String>> matches = pattern.find(words);
         assertEquals(2, matches.size());
 
@@ -119,13 +118,13 @@ public class CaseForWikiTest {
         List<String> words = Arrays.asList("Where E is the energy and λ is wavelength".split(" "));
 
         XMatcher<String> anything = anything();
-        Pattern<String> pattern = Pattern.create(oneLetterRegexp.captureAs("ID"), eq("is"), eq("the").optional(),
-                anything.captureAs("DEF"));
+        Pattern<String> pattern = Pattern.create(oneLetterRegexp.captureAs("ID"), eq("is"), eq("the")
+                .optional(), anything.captureAs("DEF"));
 
         final Map<String, String> db = new HashMap<String, String>();
         db.put("energy", "https://en.wikipedia.org/wiki/Energy");
         db.put("wavelength", "https://en.wikipedia.org/wiki/Wavelength");
-    
+
         List<String> actual = pattern.replace(words, new TransformerToList<String>() {
             @Override
             public List<String> transform(Match<String> match) {
@@ -136,9 +135,8 @@ public class CaseForWikiTest {
             }
         });
 
-        assertEquals(
-                "Where E is the energy (see https://en.wikipedia.org/wiki/Energy)" + 
-                 " and λ is wavelength (see https://en.wikipedia.org/wiki/Wavelength)", 
+        assertEquals("Where E is the energy (see https://en.wikipedia.org/wiki/Energy)"
+                + " and λ is wavelength (see https://en.wikipedia.org/wiki/Wavelength)",
                 StringUtils.join(actual, " "));
     }
 
@@ -147,8 +145,8 @@ public class CaseForWikiTest {
         List<String> words = Arrays.asList("Where E is the energy and λ is wavelength".split(" "));
 
         XMatcher<String> anything = anything();
-        Pattern<String> pattern = Pattern.create(oneLetterRegexp.captureAs("ID"), eq("is"), eq("the").optional(),
-                anything.captureAs("DEF"));
+        Pattern<String> pattern = Pattern.create(oneLetterRegexp.captureAs("ID"), eq("is"), eq("the")
+                .optional(), anything.captureAs("DEF"));
 
         List<String> actual = pattern.replaceToOne(words, new TransformerToElement<String>() {
             @Override
@@ -157,22 +155,21 @@ public class CaseForWikiTest {
             }
         });
 
-        assertEquals(Arrays.asList("Where", "E is the energy", "and", "λ is wavelength"),
-                actual);
+        assertEquals(Arrays.asList("Where", "E is the energy", "and", "λ is wavelength"), actual);
     }
 
     @Test
     public void stringSeq_oneOrMore() {
         List<String> words = Arrays.asList("Where E is the energy and λ is wavelength".split(" "));
 
-    XMatcher<String> treeLettersOrLess = new XMatcher<String>() {
-        @Override
-        public boolean match(String object) {
-            return object.length() <= 3;
-        }
-    };
+        XMatcher<String> treeLettersOrLess = new XMatcher<String>() {
+            @Override
+            public boolean match(String object) {
+                return object.length() <= 3;
+            }
+        };
 
-    Pattern<String> pattern = Pattern.create(treeLettersOrLess.oneOrMore());
+        Pattern<String> pattern = Pattern.create(treeLettersOrLess.oneOrMore());
         List<Match<String>> matches = pattern.find(words);
         assertEquals(2, matches.size());
 
@@ -185,8 +182,7 @@ public class CaseForWikiTest {
         List<String> words = Arrays.asList("Where E is the energy and λ is wavelength".split(" "));
 
         XMatcher<String> anything = anything();
-        Pattern<String> pattern = Pattern.create(
-                oneLetterRegexp.captureAs("ID"), eq("is"), 
+        Pattern<String> pattern = Pattern.create(oneLetterRegexp.captureAs("ID"), eq("is"),
                 group(eq("the").optional(), anything).captureAs("DEF"));
         List<Match<String>> matches = pattern.find(words);
         assertEquals(2, matches.size());
@@ -237,13 +233,13 @@ public class CaseForWikiTest {
             }
         };
 
-        Pattern<Word> pattern = Pattern.create(id.captureAs("ID"), is, 
-                group(the, adjective.optional(), noun).captureAs("DEF"));
+        Pattern<Word> pattern = Pattern.create(id.captureAs("ID"), is, group(the, adjective.optional(), noun)
+                .captureAs("DEF"));
 
         List<Word> words = words("where/WRB U/NNP is/VBZ the/DT internal/JJ energy/NN ,/, "
                 + "T/NNP is/VBZ the/DT absolute/JJ temperature/NN ,/, and/CC S/NNP is/VBZ "
                 + "the/DT entropy/NN ./.");
-        
+
         List<Match<Word>> result = pattern.find(words);
         assertEquals(3, result.size());
 
@@ -278,13 +274,13 @@ public class CaseForWikiTest {
         XMatcher<Word> adjective = BeanMatchers.eq(Word.class, "pos", "JJ");
         XMatcher<Word> noun = BeanMatchers.eq(Word.class, "pos", "NN");
 
-        Pattern<Word> pattern = Pattern.create(id.captureAs("ID"), is, 
-                group(the, adjective.optional(), noun).captureAs("DEF"));
+        Pattern<Word> pattern = Pattern.create(id.captureAs("ID"), is, group(the, adjective.optional(), noun)
+                .captureAs("DEF"));
 
         List<Word> words = words("where/WRB U/NNP is/VBZ the/DT internal/JJ energy/NN ,/, "
                 + "T/NNP is/VBZ the/DT absolute/JJ temperature/NN ,/, and/CC S/NNP is/VBZ "
                 + "the/DT entropy/NN ./.");
-        
+
         List<Match<Word>> result = pattern.find(words);
         assertEquals(3, result.size());
 
