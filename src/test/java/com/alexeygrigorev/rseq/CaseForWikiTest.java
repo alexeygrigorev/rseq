@@ -201,11 +201,8 @@ public class CaseForWikiTest {
     }
 
     @Test
-    public void wordSeq_eq() {
-        List<Word> words = convert("where/WRB U/NNP is/VBZ the/DT internal/JJ energy/NN ,/, "
-                + "T/NNP is/VBZ the/DT absolute/JJ temperature/NN ,/, and/CC S/NNP is/VBZ "
-                + "the/DT entropy/NN ./.");
-        XMatcher<Word> oneLetterId = new XMatcher<Word>() {
+    public void wordSeq() {
+        XMatcher<Word> id = new XMatcher<Word>() {
             @Override
             public boolean match(Word word) {
                 return word.getToken().length() == 1;
@@ -240,15 +237,30 @@ public class CaseForWikiTest {
             }
         };
 
-        Pattern<Word> pattern = Pattern.create(oneLetterId, is, 
+        Pattern<Word> pattern = Pattern.create(id.captureAs("ID"), is, 
                 group(the, adjective.optional(), noun).captureAs("DEF"));
 
+        List<Word> words = words("where/WRB U/NNP is/VBZ the/DT internal/JJ energy/NN ,/, "
+                + "T/NNP is/VBZ the/DT absolute/JJ temperature/NN ,/, and/CC S/NNP is/VBZ "
+                + "the/DT entropy/NN ./.");
+        
         List<Match<Word>> result = pattern.find(words);
         assertEquals(3, result.size());
 
+        Match<Word> match1 = result.get(0);
+        assertEquals("U", match1.getVariable("ID").getToken());
+        assertEquals(words("the/DT internal/JJ energy/NN"), match1.getCapturedGroup("DEF"));
+
+        Match<Word> match2 = result.get(1);
+        assertEquals("T", match2.getVariable("ID").getToken());
+        assertEquals(words("the/DT absolute/JJ temperature/NN"), match2.getCapturedGroup("DEF"));
+
+        Match<Word> match3 = result.get(2);
+        assertEquals("S", match3.getVariable("ID").getToken());
+        assertEquals(words("the/DT entropy/NN"), match3.getCapturedGroup("DEF"));
     }
 
-    private List<Word> convert(String sentence) {
+    private List<Word> words(String sentence) {
         String[] split = sentence.split(" ");
         List<Word> result = new ArrayList<Word>();
         for (String word : split) {
@@ -258,5 +270,35 @@ public class CaseForWikiTest {
         return result;
     }
 
+    @Test
+    public void wordSeq_beanMatcher() {
+        XMatcher<Word> id = BeanMatchers.regex(Word.class, "token", ".");
+        XMatcher<Word> is = BeanMatchers.eq(Word.class, "token", "is");
+        XMatcher<Word> the = BeanMatchers.eq(Word.class, "token", "the");
+        XMatcher<Word> adjective = BeanMatchers.eq(Word.class, "pos", "JJ");
+        XMatcher<Word> noun = BeanMatchers.eq(Word.class, "pos", "NN");
+
+        Pattern<Word> pattern = Pattern.create(id.captureAs("ID"), is, 
+                group(the, adjective.optional(), noun).captureAs("DEF"));
+
+        List<Word> words = words("where/WRB U/NNP is/VBZ the/DT internal/JJ energy/NN ,/, "
+                + "T/NNP is/VBZ the/DT absolute/JJ temperature/NN ,/, and/CC S/NNP is/VBZ "
+                + "the/DT entropy/NN ./.");
+        
+        List<Match<Word>> result = pattern.find(words);
+        assertEquals(3, result.size());
+
+        Match<Word> match1 = result.get(0);
+        assertEquals("U", match1.getVariable("ID").getToken());
+        assertEquals(words("the/DT internal/JJ energy/NN"), match1.getCapturedGroup("DEF"));
+
+        Match<Word> match2 = result.get(1);
+        assertEquals("T", match2.getVariable("ID").getToken());
+        assertEquals(words("the/DT absolute/JJ temperature/NN"), match2.getCapturedGroup("DEF"));
+
+        Match<Word> match3 = result.get(2);
+        assertEquals("S", match3.getVariable("ID").getToken());
+        assertEquals(words("the/DT entropy/NN"), match3.getCapturedGroup("DEF"));
+    }
 
 }
