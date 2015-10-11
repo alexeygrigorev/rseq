@@ -44,6 +44,20 @@ public class Matchers {
         return result;
     }
 
+
+    /**
+     * A method for wrapping user-defined {@link Matcher} classes so that 
+     * they have the same fluent interface as other {@link XMatcher} classes 
+     * (like {@link XMatcher#or(Matcher)} etc). 
+     * 
+     * @param matcher to wrap
+     * @return the same matcher, but wrapped into {@link XMatcher}
+     */
+    public static <E> XMatcher<E> x(final Matcher<E> matcher) {
+        return ParentMatcher.wrap(matcher);
+    }
+
+    
     /**
      * @param other object to test for equality
      * @return returns a matcher that matches the given <code>other</code>

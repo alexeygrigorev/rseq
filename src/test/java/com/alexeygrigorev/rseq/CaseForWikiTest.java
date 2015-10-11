@@ -199,7 +199,64 @@ public class CaseForWikiTest {
         assertEquals("λ", match2.getVariable("ID"));
         assertEquals(Arrays.asList("wavelength"), match2.getCapturedGroup("DEF"));
     }
-    
-    
+
+    @Test
+    public void wordSeq_eq() {
+        List<Word> words = convert("where/WRB U/NNP is/VBZ the/DT internal/JJ energy/NN ,/, "
+                + "T/NNP is/VBZ the/DT absolute/JJ temperature/NN ,/, and/CC S/NNP is/VBZ "
+                + "the/DT entropy/NN ./.");
+        XMatcher<Word> oneLetterId = new XMatcher<Word>() {
+            @Override
+            public boolean match(Word word) {
+                return word.getToken().length() == 1;
+            }
+        };
+
+        XMatcher<Word> is = new XMatcher<Word>() {
+            @Override
+            public boolean match(Word word) {
+                return "is".equals(word.getToken());
+            }
+        };
+
+        XMatcher<Word> the = new XMatcher<Word>() {
+            @Override
+            public boolean match(Word word) {
+                return "the".equals(word.getToken());
+            }
+        };
+
+        XMatcher<Word> adjective = new XMatcher<Word>() {
+            @Override
+            public boolean match(Word word) {
+                return "JJ".equals(word.getPos());
+            }
+        };
+
+        XMatcher<Word> noun = new XMatcher<Word>() {
+            @Override
+            public boolean match(Word word) {
+                return "NN".equals(word.getPos());
+            }
+        };
+
+        Pattern<Word> pattern = Pattern.create(oneLetterId, is, 
+                group(the, adjective.optional(), noun).captureAs("DEF"));
+
+        List<Match<Word>> result = pattern.find(words);
+        assertEquals(3, result.size());
+
+    }
+
+    private List<Word> convert(String sentence) {
+        String[] split = sentence.split(" ");
+        List<Word> result = new ArrayList<Word>();
+        for (String word : split) {
+            String[] token = word.split("/");
+            result.add(new Word(token[0], token[1]));
+        }
+        return result;
+    }
+
 
 }
