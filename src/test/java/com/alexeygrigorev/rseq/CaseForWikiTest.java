@@ -1,15 +1,19 @@
 package com.alexeygrigorev.rseq;
 
-import static com.alexeygrigorev.rseq.Matchers.*;
+import static com.alexeygrigorev.rseq.Matchers.anything;
+import static com.alexeygrigorev.rseq.Matchers.eq;
+import static com.alexeygrigorev.rseq.Matchers.group;
+import static com.alexeygrigorev.rseq.Matchers.in;
 import static org.junit.Assert.assertEquals;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
-
-import com.alexeygrigorev.rseq.Match;
-import com.alexeygrigorev.rseq.Pattern;
 
 /**
  * Case tests used for tutorial on project wiki
@@ -111,6 +115,72 @@ public class CaseForWikiTest {
     }
 
     @Test
+    public void stringSeq_replace() {
+        List<String> words = Arrays.asList("Where E is the energy and λ is wavelength".split(" "));
+
+        XMatcher<String> anything = anything();
+        Pattern<String> pattern = Pattern.create(oneLetterRegexp.captureAs("ID"), eq("is"), eq("the").optional(),
+                anything.captureAs("DEF"));
+
+        final Map<String, String> db = new HashMap<String, String>();
+        db.put("energy", "https://en.wikipedia.org/wiki/Energy");
+        db.put("wavelength", "https://en.wikipedia.org/wiki/Wavelength");
+    
+        List<String> actual = pattern.replace(words, new TransformerToList<String>() {
+            @Override
+            public List<String> transform(Match<String> match) {
+                List<String> result = new ArrayList<>(match.getMatchedSubsequence());
+                String link = db.get(match.getVariable("DEF"));
+                result.add("(see " + link + ")");
+                return result;
+            }
+        });
+
+        assertEquals(
+                "Where E is the energy (see https://en.wikipedia.org/wiki/Energy)" + 
+                 " and λ is wavelength (see https://en.wikipedia.org/wiki/Wavelength)", 
+                StringUtils.join(actual, " "));
+    }
+
+    @Test
+    public void stringSeq_replaceOne() {
+        List<String> words = Arrays.asList("Where E is the energy and λ is wavelength".split(" "));
+
+        XMatcher<String> anything = anything();
+        Pattern<String> pattern = Pattern.create(oneLetterRegexp.captureAs("ID"), eq("is"), eq("the").optional(),
+                anything.captureAs("DEF"));
+
+        List<String> actual = pattern.replaceToOne(words, new TransformerToElement<String>() {
+            @Override
+            public String transform(Match<String> match) {
+                return StringUtils.join(match.getMatchedSubsequence(), " ");
+            }
+        });
+
+        assertEquals(Arrays.asList("Where", "E is the energy", "and", "λ is wavelength"),
+                actual);
+    }
+
+    @Test
+    public void stringSeq_oneOrMore() {
+        List<String> words = Arrays.asList("Where E is the energy and λ is wavelength".split(" "));
+
+    XMatcher<String> treeLettersOrLess = new XMatcher<String>() {
+        @Override
+        public boolean match(String object) {
+            return object.length() <= 3;
+        }
+    };
+
+    Pattern<String> pattern = Pattern.create(treeLettersOrLess.oneOrMore());
+        List<Match<String>> matches = pattern.find(words);
+        assertEquals(2, matches.size());
+
+        assertEquals(Arrays.asList("E", "is", "the"), matches.get(0).getMatchedSubsequence());
+        assertEquals(Arrays.asList("and", "λ", "is"), matches.get(1).getMatchedSubsequence());
+    }
+
+    @Test
     public void stringSeq_group() {
         List<String> words = Arrays.asList("Where E is the energy and λ is wavelength".split(" "));
 
@@ -129,5 +199,7 @@ public class CaseForWikiTest {
         assertEquals("λ", match2.getVariable("ID"));
         assertEquals(Arrays.asList("wavelength"), match2.getCapturedGroup("DEF"));
     }
+    
+    
 
 }

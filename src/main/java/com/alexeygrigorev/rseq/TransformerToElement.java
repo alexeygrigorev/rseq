@@ -1,6 +1,6 @@
 package com.alexeygrigorev.rseq;
 
-public interface Transformer<E> {
+public interface TransformerToElement<E> {
 
     E transform(Match<E> match);
 

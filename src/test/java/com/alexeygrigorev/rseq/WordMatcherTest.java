@@ -17,11 +17,11 @@ import org.junit.Test;
 
 import com.alexeygrigorev.rseq.BeanMatchers;
 import com.alexeygrigorev.rseq.Match;
-import com.alexeygrigorev.rseq.MatchTransformer;
+import com.alexeygrigorev.rseq.TransformerToList;
 import com.alexeygrigorev.rseq.Matcher;
 import com.alexeygrigorev.rseq.Matchers;
 import com.alexeygrigorev.rseq.Pattern;
-import com.alexeygrigorev.rseq.Transformer;
+import com.alexeygrigorev.rseq.TransformerToElement;
 import com.alexeygrigorev.rseq.XMatcher;
 
 public class WordMatcherTest {
@@ -641,7 +641,7 @@ public class WordMatcherTest {
         XMatcher<Word> comma = BeanMatchers.eq(Word.class, "token", ",");
         Pattern<Word> pattern = Pattern.create(comma.oneOrMore());
 
-        List<Word> result = pattern.replaceMatched(sentence, new MatchTransformer<Word>() {
+        List<Word> result = pattern.replace(sentence, new TransformerToList<Word>() {
             @Override
             public List<Word> transform(Match<Word> match) {
                 return Arrays.asList(new Word(",", ","));
@@ -661,7 +661,7 @@ public class WordMatcherTest {
         XMatcher<Word> quote = Matchers.eq(w("'/'"));
         Pattern<Word> pattern = Pattern.create(quote, any.zeroOrMore(), quote);
 
-        List<Word> result = pattern.replace(sentence, new Transformer<Word>() {
+        List<Word> result = pattern.replaceToOne(sentence, new TransformerToElement<Word>() {
             @Override
             public Word transform(Match<Word> match) {
                 List<String> toJoin = new ArrayList<String>();
@@ -697,7 +697,7 @@ public class WordMatcherTest {
         List<Match<Word>> expectedMatches = Arrays.asList(match1, match2, match3, match4, match5);
         assertEquals(expectedMatches, matches);
 
-        List<Word> result = pattern.replaceMatched(sentence, new MatchTransformer<Word>() {
+        List<Word> result = pattern.replace(sentence, new TransformerToList<Word>() {
             @Override
             public List<Word> transform(Match<Word> match) {
                 return sentence(",/,");

@@ -14,7 +14,7 @@ import org.apache.commons.lang3.Validate;
  * elements of the sequence. When all matchers in the pattern match some
  * subsequence of the input sequence, we find a {@link Match}. The found
  * subsequences can then be transformed using the
- * {@link #replace(List, Transformer)} method.<br>
+ * {@link #replaceToOne(List, TransformerToElement)} method.<br>
  * <br>
  * 
  * To create a pattern, use {@link #create(Matcher...)} method. To see available
@@ -24,7 +24,7 @@ import org.apache.commons.lang3.Validate;
  * @author Alexey Grigorev
  * @see Matcher
  * @see Match
- * @see Transformer
+ * @see TransformerToElement
  *
  * @param <E>
  */
@@ -102,15 +102,15 @@ public class Pattern<E> {
      * subsequences by exactly one element. If you need to replace them by other
      * sequences or use any additional information (like captured variables, as
      * provided by {@link ParentMatcher#captureAs(String)}), then you should use
-     * {@link #replaceMatched(List, MatchTransformer)} method instead
+     * {@link #replace(List, TransformerToList)} method instead
      * 
      * @param sequence to transform
      * @param transformer transformation to be applied to each matched
      *        subsequence
      * @return transformed sequence
      */
-    public List<E> replace(List<E> sequence, final Transformer<E> transformer) {
-        return replaceMatched(sequence, new MatchTransformer<E>() {
+    public List<E> replaceToOne(List<E> sequence, final TransformerToElement<E> transformer) {
+        return replace(sequence, new TransformerToList<E>() {
             @Override
             public List<E> transform(Match<E> match) {
                 E result = transformer.transform(match);
@@ -132,19 +132,19 @@ public class Pattern<E> {
      * match, like variables (e.g. from {@link ParentMatcher#captureAs(String)})
      * or when the result of the transformation is also a sequence. However in
      * most cases you probably will need to transform each subsequence to a
-     * single element, and thus, use {@link #replace(List, Transformer)}.
+     * single element, and thus, use {@link #replaceToOne(List, TransformerToElement)}.
      * 
      * @param sequence to transform
      * @param transformer transformation to be applied to each matched
      *        subsequence
      * @return transformed sequence
      */
-    public List<E> replaceMatched(List<E> sequence, MatchTransformer<E> transformer) {
+    public List<E> replace(List<E> sequence, TransformerToList<E> transformer) {
         List<Match<E>> matches = find(sequence);
         return replace(sequence, matches, transformer);
     }
 
-    private List<E> replace(List<E> sequence, List<Match<E>> matches, MatchTransformer<E> transformer) {
+    private List<E> replace(List<E> sequence, List<Match<E>> matches, TransformerToList<E> transformer) {
         if (matches.isEmpty()) {
             return sequence;
         }

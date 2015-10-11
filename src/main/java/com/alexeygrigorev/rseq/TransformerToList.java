@@ -2,7 +2,7 @@ package com.alexeygrigorev.rseq;
 
 import java.util.List;
 
-public interface MatchTransformer<E> {
+public interface TransformerToList<E> {
 
     List<E> transform(Match<E> match);
 
