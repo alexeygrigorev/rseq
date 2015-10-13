@@ -1,6 +1,6 @@
 [![Build Status](https://travis-ci.org/alexeygrigorev/rseq.svg)](https://travis-ci.org/alexeygrigorev/rseq)
 [![MavenCentral](https://maven-badges.herokuapp.com/maven-central/com.alexeygrigorev/rseq/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.alexeygrigorev/rseq/)
-[![Coverage Status](https://coveralls.io/repos/alexeygrigorev/rseq/badge.svg)](https://coveralls.io/r/alexeygrigorev/rseq)
+[![Coverage Status](https://coveralls.io/repos/alexeygrigorev/rseq/badge.svg?branch=master&service=github)](https://coveralls.io/github/alexeygrigorev/rseq?branch=master)
 
 
 # **rseq**: Pattern matching made easier 
