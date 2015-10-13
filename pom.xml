@@ -5,6 +5,32 @@
   <groupId>com.alexeygrigorev</groupId>
   <artifactId>rseq</artifactId>
   <version>0.0.1</version>
+  <packaging>jar</packaging>
+
+  <name>${project.groupId}:${project.artifactId}</name>
+  <description>a pattern-matching library for operating on sequences of any Java objects</description>  
+  <url>https://github.com/alexeygrigorev/rseq</url>
+
+  <licenses>
+    <license>
+      <name>WTFPL</name>
+      <url>http://www.wtfpl.net/txt/copying/</url>
+    </license>
+  </licenses>
+
+  <developers>
+    <developer>
+      <name>Alexey Grigorev</name>
+      <email>alexey.s.grigoriev@gmail.com</email>
+      <url>http://alexeygrigorev.com</url>
+    </developer>
+  </developers>
+
+  <scm>
+    <connection>scm:git:git@github.com:alexeygrigorev/rseq.git</connection>
+    <developerConnection>scm:git:git@github.com:alexeygrigorev/rseq.git</developerConnection>
+    <url>git@github.com:alexeygrigorev/rseq.git</url>
+  </scm>
 
   <distributionManagement>
     <snapshotRepository>
