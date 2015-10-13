@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/alexeygrigorev/rseq.svg)](https://travis-ci.org/alexeygrigorev/rseq)
+[![MavenCentral](https://maven-badges.herokuapp.com/maven-central/com.alexeygrigorev/rseq/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.alexeygrigorev/rseq/)
 
 # **rseq**: Pattern matching made easier 
 
@@ -7,6 +8,14 @@
     Pattern pattern = Pattern.create(oneLetterRegexp.captureAs("ID"),
                                      eq("is"), eq("the").or(eq("a")).optional(), 
                                      anything.captureAs("DEF"));
+
+It is available on maven central:
+
+    <dependency>
+      <groupId>com.alexeygrigorev</groupId>
+      <artifactId>rseq</artifactId>
+      <version>0.0.1</version>
+    </dependency>
 
 ### Features 
 
