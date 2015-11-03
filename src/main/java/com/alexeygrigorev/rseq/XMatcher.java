@@ -1,5 +1,7 @@
 package com.alexeygrigorev.rseq;
 
+import java.util.List;
+
 /**
  * A class that implements {@link Matcher} and adds some extra methods for
  * convenience (like {@link #or(Matcher)} or {@link #optional()})
@@ -38,6 +40,18 @@ public abstract class XMatcher<E> implements Matcher<E> {
 
     public XMatcher<E> invert() {
         return Matchers.not(this);
+    }
+
+    public boolean all(List<E> sequence) {
+        return Quantifiers.all(this, sequence);
+    }
+
+    public boolean any(List<E> sequence) {
+        return Quantifiers.any(this, sequence);
+    }
+
+    public boolean none(List<E> sequence) {
+        return Quantifiers.none(this, sequence);
     }
 
     @Override
