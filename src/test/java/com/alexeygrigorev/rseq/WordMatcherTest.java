@@ -710,15 +710,27 @@ public class WordMatcherTest {
     }
 
     @Test
-    public void matchAny_zeroOrMore() {
+    public void matchAny_zeroOrMore_ok() {
+        List<Word> sentence = sentence("one/NN", ",/NN", "two/NN");
+        XMatcher<Word> any = Matchers.anything();
+        Pattern<Word> pattern = Pattern.create(word("one").captureAs("one"), any.zeroOrMore(), word("two").captureAs("two"));
+        List<Match<Word>> matches = pattern.find(sentence);
+        assertEquals(1, matches.size());
+        Match<Word> match = matches.get(0);
+        assertEquals("one", match.getVariable("one").getToken());
+        assertEquals("two", match.getVariable("two").getToken());
+    }
+
+    @Test
+    public void matchAny_zeroOrMore_flawed() {
         List<Word> sentence = sentence("one/NN", "two/NN");
         XMatcher<Word> any = Matchers.anything();
         Pattern<Word> pattern = Pattern.create(word("one").captureAs("one"), any.zeroOrMore(), word("two").captureAs("two"));
         List<Match<Word>> matches = pattern.find(sentence);
         assertEquals(1, matches.size());
         Match<Word> match = matches.get(0);
-        assertEquals("one", match.getVariable("one"));
-        assertEquals("two", match.getVariable("two"));
+        assertEquals("one", match.getVariable("one").getToken());
+        assertEquals("two", match.getVariable("two").getToken());
     }
 
     public static List<Word> sentence(String... words) {
