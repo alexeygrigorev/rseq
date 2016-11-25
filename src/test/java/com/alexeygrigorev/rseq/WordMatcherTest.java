@@ -709,6 +709,18 @@ public class WordMatcherTest {
         assertEquals(expectedResult, result);
     }
 
+    @Test
+    public void matchAny_zeroOrMore() {
+        List<Word> sentence = sentence("one/NN", "two/NN");
+        XMatcher<Word> any = Matchers.anything();
+        Pattern<Word> pattern = Pattern.create(word("one").captureAs("one"), any.zeroOrMore(), word("two").captureAs("two"));
+        List<Match<Word>> matches = pattern.find(sentence);
+        assertEquals(1, matches.size());
+        Match<Word> match = matches.get(0);
+        assertEquals("one", match.getVariable("one"));
+        assertEquals("two", match.getVariable("two"));
+    }
+
     public static List<Word> sentence(String... words) {
         List<Word> res = new ArrayList<Word>();
         for (String word : words) {
