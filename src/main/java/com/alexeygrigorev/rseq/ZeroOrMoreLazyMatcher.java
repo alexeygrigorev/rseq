@@ -30,7 +30,7 @@ class ZeroOrMoreLazyMatcher<E> extends ZeroOrMoreGreedyMatcher<E> {
 
         ListIterator<E> currentIterator = context().getCurrentMatchIterator();
 
-        if (!delegateMatch(object)) {
+        if (!delegateMatch(object) || nextMatcher.match(object)) {
             currentIterator.previous();
             return true;
         }
